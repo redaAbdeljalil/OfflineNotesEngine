@@ -35,11 +35,12 @@ object AppModule {
         @ApplicationContext context: Context,
         securityRepository: SecurityRepository
     ): OfflineNotesDatabase {
+        val dbName = "offline_notes_premium_db" // Change name to avoid conflict with old unencrypted DB
         val factory = SupportFactory(securityRepository.getDatabasePassphrase())
         return Room.databaseBuilder(
             context,
             OfflineNotesDatabase::class.java,
-            "offline_notes_db"
+            dbName
         )
             .openHelperFactory(factory)
             .fallbackToDestructiveMigration()
