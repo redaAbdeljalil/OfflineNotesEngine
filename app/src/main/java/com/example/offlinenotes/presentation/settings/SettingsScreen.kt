@@ -31,6 +31,9 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val settings by viewModel.settings.collectAsStateWithLifecycle()
+    val isBiometricEnabled by viewModel.isBiometricEnabled.collectAsStateWithLifecycle()
+    val isScreenshotProtected by viewModel.isScreenshotProtected.collectAsStateWithLifecycle()
+    
     var showThemeDialog by remember { mutableStateOf(false) }
     var showSortingDialog by remember { mutableStateOf(false) }
     var showFontDialog by remember { mutableStateOf(false) }
@@ -74,6 +77,24 @@ fun SettingsScreen(
                             onColorSelected = { viewModel.setDefaultColor(it) }
                         )
                     }
+                }
+            }
+            item {
+                SettingsSection("Security") {
+                    SettingsToggleItem(
+                        icon = Icons.Outlined.Fingerprint,
+                        title = "Biometric Lock",
+                        description = "Lock app with fingerprint/face",
+                        checked = isBiometricEnabled,
+                        onCheckedChange = viewModel::setBiometricEnabled
+                    )
+                    SettingsToggleItem(
+                        icon = Icons.Outlined.Security,
+                        title = "Screenshot Protection",
+                        description = "Prevent screenshots of your notes",
+                        checked = isScreenshotProtected,
+                        onCheckedChange = viewModel::setScreenshotProtection
+                    )
                 }
             }
             item {
@@ -254,5 +275,46 @@ fun SettingsItem(
                 )
             }
         }
+    }
+}
+
+@Composable
+fun SettingsToggleItem(
+    icon: ImageVector,
+    title: String,
+    description: String,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onCheckedChange(!checked) }
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(24.dp)
+        )
+        Spacer(modifier = Modifier.width(16.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(text = title, style = MaterialTheme.typography.titleMedium)
+            Text(
+                text = description,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+            )
+        }
+        Switch(
+            checked = checked,
+            onCheckedChange = onCheckedChange,
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
+                checkedTrackColor = MaterialTheme.colorScheme.primary
+            )
+        )
     }
 }

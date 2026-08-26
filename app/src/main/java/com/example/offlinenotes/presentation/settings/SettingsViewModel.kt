@@ -6,6 +6,7 @@ import com.example.offlinenotes.domain.model.AppTheme
 import com.example.offlinenotes.domain.model.AppSettings
 import com.example.offlinenotes.domain.model.EditorFont
 import com.example.offlinenotes.domain.model.NoteSorting
+import com.example.offlinenotes.domain.repository.SecurityRepository
 import com.example.offlinenotes.domain.repository.SettingsRepository
 import com.example.offlinenotes.domain.usecase.NoteUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,11 +19,18 @@ import javax.inject.Inject
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val repository: SettingsRepository,
+    private val securityRepository: SecurityRepository,
     private val noteUseCases: NoteUseCases
 ) : ViewModel() {
 
     val settings: StateFlow<AppSettings> = repository.settings
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), AppSettings())
+
+    val isBiometricEnabled: StateFlow<Boolean> = securityRepository.isBiometricEnabled
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+
+    val isScreenshotProtected: StateFlow<Boolean> = securityRepository.isScreenshotProtectionEnabled
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 
     fun setTheme(theme: AppTheme) = viewModelScope.launch {
         repository.setTheme(theme)
@@ -45,5 +53,13 @@ class SettingsViewModel @Inject constructor(
 
     fun setDefaultColor(colorHex: String?) = viewModelScope.launch {
         repository.setDefaultColor(colorHex)
+    }
+
+    fun setBiometricEnabled(enabled: Boolean) = viewModelScope.launch {
+        securityRepository.setBiometricEnabled(enabled)
+    }
+
+    fun setScreenshotProtection(enabled: Boolean) = viewModelScope.launch {
+        securityRepository.setScreenshotProtectionEnabled(enabled)
     }
 }

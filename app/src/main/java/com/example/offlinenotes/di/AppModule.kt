@@ -6,14 +6,17 @@ import androidx.work.WorkManager
 import com.example.offlinenotes.data.local.OfflineNotesDatabase
 import com.example.offlinenotes.data.remote.MockRemoteDataSource
 import com.example.offlinenotes.data.repository.NoteRepositoryImpl
+import com.example.offlinenotes.data.repository.SecurityRepositoryImpl
 import com.example.offlinenotes.data.repository.SettingsRepositoryImpl
 import com.example.offlinenotes.domain.repository.NoteRepository
+import com.example.offlinenotes.domain.repository.SecurityRepository
 import com.example.offlinenotes.domain.repository.SettingsRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import net.sqlcipher.database.SupportFactory
 import javax.inject.Singleton
 
 @Module
@@ -22,12 +25,25 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideDatabase(@ApplicationContext context: Context): OfflineNotesDatabase {
+    fun provideSecurityRepository(@ApplicationContext context: Context): SecurityRepository {
+        return SecurityRepositoryImpl(context)
+    }
+
+    @Provides
+    @Singleton
+    fun provideDatabase(
+        @ApplicationContext context: Context,
+        securityRepository: SecurityRepository
+    ): OfflineNotesDatabase {
+        val factory = SupportFactory(securityRepository.getDatabasePassphrase())
         return Room.databaseBuilder(
             context,
             OfflineNotesDatabase::class.java,
             "offline_notes_db"
-        ).fallbackToDestructiveMigration().build()
+        )
+            .openHelperFactory(factory)
+            .fallbackToDestructiveMigration()
+            .build()
     }
 
     @Provides
