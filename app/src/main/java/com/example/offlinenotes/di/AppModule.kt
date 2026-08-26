@@ -1,0 +1,49 @@
+package com.example.offlinenotes.di
+
+import android.content.Context
+import androidx.room.Room
+import androidx.work.WorkManager
+import com.example.offlinenotes.data.local.OfflineNotesDatabase
+import com.example.offlinenotes.data.remote.MockRemoteDataSource
+import com.example.offlinenotes.data.repository.NoteRepositoryImpl
+import com.example.offlinenotes.domain.repository.NoteRepository
+import dagger.Module
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.components.SingletonComponent
+import javax.inject.Singleton
+
+@Module
+@InstallIn(SingletonComponent::class)
+object AppModule {
+
+    @Provides
+    @Singleton
+    fun provideDatabase(@ApplicationContext context: Context): OfflineNotesDatabase {
+        return Room.databaseBuilder(
+            context,
+            OfflineNotesDatabase::class.java,
+            "offline_notes_db"
+        ).build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideWorkManager(@ApplicationContext context: Context): WorkManager {
+        return WorkManager.getInstance(context)
+    }
+
+    @Provides
+    @Singleton
+    fun provideNoteRepository(
+        database: OfflineNotesDatabase,
+        workManager: WorkManager
+    ): NoteRepository {
+        return NoteRepositoryImpl(database, workManager)
+    }
+
+    @Provides
+    @Singleton
+    fun provideRemoteDataSource(): MockRemoteDataSource = MockRemoteDataSource()
+}
