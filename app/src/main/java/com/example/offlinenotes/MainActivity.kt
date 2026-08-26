@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.WindowManager
 import android.widget.Toast
 import androidx.activity.compose.setContent
+import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -52,11 +53,15 @@ class MainActivity : FragmentActivity() { // FragmentActivity for Biometrics
             LaunchedEffect(isBiometricEnabled) {
                 val enabled = isBiometricEnabled
                 if (enabled != null) {
-                    if (enabled) {
+                    if (enabled && !isAuthenticated) {
                         showBiometricPrompt { authenticated ->
-                            isAuthenticated = authenticated
-                            isAuthChecked = true
-                            if (!authenticated) finish()
+                            if (authenticated) {
+                                isAuthenticated = true
+                                isAuthChecked = true
+                            } else {
+                                // If authentication failed or was cancelled, we close the app to protect data
+                                finish()
+                            }
                         }
                     } else {
                         isAuthenticated = true
@@ -86,7 +91,7 @@ class MainActivity : FragmentActivity() { // FragmentActivity for Biometrics
                 ) {
                     if (isLoading || !isAuthChecked) {
                         SplashScreen()
-                    } else if (isAuthenticated) {
+                    } else {
                         val startDestination = if (settings?.isOnboardingCompleted == true) "home" else "onboarding"
                         AppNavGraph(startDestination = startDestination)
                     }
@@ -102,7 +107,6 @@ class MainActivity : FragmentActivity() { // FragmentActivity for Biometrics
             contentAlignment = Alignment.Center
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                // Premium Loader
                 Box(
                     modifier = Modifier
                         .size(64.dp)
@@ -144,25 +148,34 @@ class MainActivity : FragmentActivity() { // FragmentActivity for Biometrics
 
                 override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
                     super.onAuthenticationError(errorCode, errString)
-                    // Only exit if it's a real failure, not just a cancelation of a previous prompt
-                    if (errorCode != BiometricPrompt.ERROR_USER_CANCELED && errorCode != BiometricPrompt.ERROR_NEGATIVE_BUTTON) {
-                         onResult(false)
-                    } else {
-                        onResult(false)
-                    }
+                    // If user cancels or clicks negative button, we should not grant access
+                    onResult(false)
                 }
 
                 override fun onAuthenticationFailed() {
                     super.onAuthenticationFailed()
+                    // This is called when a fingerprint is recognized but doesn't match. 
+                    // We don't call onResult(false) yet because the user can try again.
                 }
             })
 
-        val promptInfo = BiometricPrompt.PromptInfo.Builder()
-            .setTitle("Premium Notes Locked")
-            .setSubtitle("Authenticate to access your private notes")
-            .setNegativeButtonText("Exit")
-            .build()
+        // Check for available authenticators
+        val biometricManager = BiometricManager.from(this)
+        val canAuthenticate = biometricManager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.DEVICE_CREDENTIAL)
 
-        biometricPrompt.authenticate(promptInfo)
+        if (canAuthenticate == BiometricManager.BIOMETRIC_SUCCESS) {
+            val promptInfo = BiometricPrompt.PromptInfo.Builder()
+                .setTitle("Premium Notes Locked")
+                .setSubtitle("Authenticate to access your private notes")
+                .setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.DEVICE_CREDENTIAL)
+                .build()
+
+            biometricPrompt.authenticate(promptInfo)
+        } else {
+            // If no biometric or PIN is set up on the device, we skip authentication but maybe warn the user
+            // Alternatively, if you want it to be strictly secure, you could return false here.
+            // For better UX, we'll allow entry if the device has no security set up at all.
+            onResult(true)
+        }
     }
 }
