@@ -1,6 +1,9 @@
 package com.example.offlinenotes
 
+import android.content.Intent
+import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.view.WindowManager
 import android.widget.Toast
 import androidx.activity.compose.setContent
@@ -10,6 +13,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -46,6 +50,7 @@ class MainActivity : FragmentActivity() { // FragmentActivity for Biometrics
             // App state management
             var isAuthenticated by remember { mutableStateOf(false) }
             var isAuthChecked by remember { mutableStateOf(false) }
+            var showNoSecurityDialog by remember { mutableStateOf(false) }
 
             // Determine if we are still loading initial user preferences
             val isLoading = settings == null || isBiometricEnabled == null
@@ -54,14 +59,21 @@ class MainActivity : FragmentActivity() { // FragmentActivity for Biometrics
                 val enabled = isBiometricEnabled
                 if (enabled != null) {
                     if (enabled && !isAuthenticated) {
-                        showBiometricPrompt { authenticated ->
-                            if (authenticated) {
-                                isAuthenticated = true
-                                isAuthChecked = true
-                            } else {
-                                // If authentication failed or was cancelled, we close the app to protect data
-                                finish()
+                        val status = checkBiometricAvailability()
+                        if (status == BiometricManager.BIOMETRIC_SUCCESS || status == BiometricManager.BIOMETRIC_STATUS_UNKNOWN) {
+                            showBiometricPrompt { authenticated ->
+                                if (authenticated) {
+                                    isAuthenticated = true
+                                    isAuthChecked = true
+                                } else {
+                                    finish()
+                                }
                             }
+                        } else if (status == BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED) {
+                            showNoSecurityDialog = true
+                        } else {
+                            isAuthenticated = true
+                            isAuthChecked = true
                         }
                     } else {
                         isAuthenticated = true
@@ -95,9 +107,58 @@ class MainActivity : FragmentActivity() { // FragmentActivity for Biometrics
                         val startDestination = if (settings?.isOnboardingCompleted == true) "home" else "onboarding"
                         AppNavGraph(startDestination = startDestination)
                     }
+
+                    if (showNoSecurityDialog) {
+                        SecuritySetupDialog(
+                            onDismiss = { 
+                                showNoSecurityDialog = false
+                                isAuthenticated = true
+                                isAuthChecked = true
+                            },
+                            onOpenSettings = {
+                                openSecuritySettings()
+                                showNoSecurityDialog = false
+                            }
+                        )
+                    }
                 }
             }
         }
+    }
+
+    @Composable
+    private fun SecuritySetupDialog(onDismiss: () -> Unit, onOpenSettings: () -> Unit) {
+        AlertDialog(
+            onDismissRequest = onDismiss,
+            title = { Text("Setup Required") },
+            text = { Text("Biometric Lock is enabled, but your device has no PIN or Fingerprint set up. Please secure your device to protect your notes.") },
+            confirmButton = {
+                Button(onClick = onOpenSettings) { Text("Open Settings") }
+            },
+            dismissButton = {
+                TextButton(onClick = onDismiss) { Text("Later") }
+            },
+            shape = RoundedCornerShape(28.dp)
+        )
+    }
+
+    private fun openSecuritySettings() {
+        val intent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            Intent(Settings.ACTION_BIOMETRIC_ENROLL).apply {
+                putExtra(Settings.EXTRA_BIOMETRIC_AUTHENTICATORS_ALLOWED, 
+                    BiometricManager.Authenticators.BIOMETRIC_WEAK or BiometricManager.Authenticators.DEVICE_CREDENTIAL)
+            }
+        } else {
+            Intent(Settings.ACTION_SECURITY_SETTINGS)
+        }
+        startActivity(intent)
+    }
+
+    private fun checkBiometricAvailability(): Int {
+        val biometricManager = BiometricManager.from(this)
+        return biometricManager.canAuthenticate(
+            BiometricManager.Authenticators.BIOMETRIC_WEAK or BiometricManager.Authenticators.DEVICE_CREDENTIAL
+        )
     }
 
     @Composable
@@ -148,7 +209,6 @@ class MainActivity : FragmentActivity() { // FragmentActivity for Biometrics
 
                 override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
                     super.onAuthenticationError(errorCode, errString)
-                    // Errors include user cancellation. We only grant access on success.
                     onResult(false)
                 }
 
@@ -157,29 +217,15 @@ class MainActivity : FragmentActivity() { // FragmentActivity for Biometrics
                 }
             })
 
-        // We use BIOMETRIC_WEAK | DEVICE_CREDENTIAL to ensure compatibility across all devices
-        // This allows Fingerprint, Face ID, or the device PIN/Pattern/Password.
         val authenticators = BiometricManager.Authenticators.BIOMETRIC_WEAK or 
                             BiometricManager.Authenticators.DEVICE_CREDENTIAL
 
-        val biometricManager = BiometricManager.from(this)
-        val canAuthenticate = biometricManager.canAuthenticate(authenticators)
+        val promptInfo = BiometricPrompt.PromptInfo.Builder()
+            .setTitle("Premium Notes Locked")
+            .setSubtitle("Use fingerprint or your device PIN to continue")
+            .setAllowedAuthenticators(authenticators)
+            .build()
 
-        if (canAuthenticate == BiometricManager.BIOMETRIC_SUCCESS || 
-            canAuthenticate == BiometricManager.BIOMETRIC_STATUS_UNKNOWN) {
-            
-            val promptInfo = BiometricPrompt.PromptInfo.Builder()
-                .setTitle("Premium Notes Locked")
-                .setSubtitle("Use fingerprint or your device PIN to continue")
-                .setAllowedAuthenticators(authenticators)
-                // Note: setNegativeButtonText MUST NOT be called when DEVICE_CREDENTIAL is used.
-                .build()
-
-            biometricPrompt.authenticate(promptInfo)
-        } else {
-            // If the device doesn't support any form of lock (very rare), we allow entry 
-            // to prevent the user from being permanently locked out of their own notes.
-            onResult(true)
-        }
+        biometricPrompt.authenticate(promptInfo)
     }
 }
