@@ -18,7 +18,9 @@ data class Note(
     val isArchived: Boolean,
     val isDeleted: Boolean,
     val version: Int,
-    val syncStatus: SyncStatus
+    val syncStatus: SyncStatus,
+    val colorHex: String? = null,
+    val tags: List<String> = emptyList()
 )
 
 data class NoteVersion(

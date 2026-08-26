@@ -14,6 +14,9 @@ interface NoteDao {
     @Query("SELECT * FROM notes WHERE isArchived = 1 AND isDeleted = 0 ORDER BY updatedAt DESC")
     fun getArchivedNotes(): Flow<List<NoteEntity>>
 
+    @Query("SELECT * FROM notes WHERE isDeleted = 1 ORDER BY updatedAt DESC")
+    fun getDeletedNotes(): Flow<List<NoteEntity>>
+
     @Query("SELECT * FROM notes WHERE id = :id")
     fun getNoteById(id: String): Flow<NoteEntity?>
 

@@ -31,6 +31,9 @@ class NoteRepositoryImpl @Inject constructor(
     override fun getArchivedNotes(): Flow<List<Note>> =
         database.noteDao.getArchivedNotes().map { list -> list.map { it.toDomain() } }
 
+    override fun getDeletedNotes(): Flow<List<Note>> =
+        database.noteDao.getDeletedNotes().map { list -> list.map { it.toDomain() } }
+
     override fun getNoteById(id: String): Flow<Note?> =
         database.noteDao.getNoteById(id).map { it?.toDomain() }
 

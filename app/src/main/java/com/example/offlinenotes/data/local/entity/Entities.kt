@@ -16,7 +16,9 @@ data class NoteEntity(
     val isArchived: Boolean,
     val isDeleted: Boolean,
     val version: Int,
-    val syncStatus: SyncStatus
+    val syncStatus: SyncStatus,
+    val colorHex: String?,
+    val tags: List<String>
 )
 
 @Entity(tableName = "note_versions")

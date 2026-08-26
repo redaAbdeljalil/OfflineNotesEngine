@@ -25,7 +25,7 @@ object AppModule {
             context,
             OfflineNotesDatabase::class.java,
             "offline_notes_db"
-        ).build()
+        ).fallbackToDestructiveMigration().build()
     }
 
     @Provides

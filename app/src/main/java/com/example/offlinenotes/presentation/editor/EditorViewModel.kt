@@ -20,7 +20,10 @@ data class EditorState(
     val content: String = "",
     val noteId: String = UUID.randomUUID().toString(),
     val isExisting: Boolean = false,
-    val syncStatus: SyncStatus = SyncStatus.PENDING
+    val syncStatus: SyncStatus = SyncStatus.PENDING,
+    val colorHex: String? = null,
+    val tags: List<String> = emptyList(),
+    val isSaving: Boolean = false
 )
 
 @HiltViewModel
@@ -31,17 +34,22 @@ class EditorViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(EditorState())
     val uiState = _uiState.asStateFlow()
 
-    // Undo/Redo Engine
     private val undoStack = mutableListOf<EditorState>()
     private val redoStack = mutableListOf<EditorState>()
     private var saveJob: Job? = null
 
     fun loadNote(noteId: String) {
-        if (noteId == "new") return
+        if (noteId == "new") {
+            _uiState.update { it.copy(noteId = UUID.randomUUID().toString(), isExisting = false) }
+            return
+        }
         viewModelScope.launch {
             useCases.getNoteDetails(noteId).collect { note ->
                 note?.let {
-                    val state = EditorState(it.title, it.content, it.id, true, it.syncStatus)
+                    val state = EditorState(
+                        it.title, it.content, it.id, true, it.syncStatus,
+                        it.colorHex, it.tags
+                    )
                     _uiState.value = state
                     if (undoStack.isEmpty()) undoStack.add(state)
                 }
@@ -61,32 +69,45 @@ class EditorViewModel @Inject constructor(
         scheduleSave()
     }
 
+    fun onColorChange(colorHex: String?) {
+        pushToUndoStack()
+        _uiState.update { it.copy(colorHex = colorHex) }
+        saveImmediately()
+    }
+
+    fun onTagsChange(tags: List<String>) {
+        pushToUndoStack()
+        _uiState.update { it.copy(tags = tags) }
+        saveImmediately()
+    }
+
     private fun pushToUndoStack() {
-        undoStack.add(_uiState.value)
-        if (undoStack.size > 50) undoStack.removeAt(0) // Limit memory
+        undoStack.add(_uiState.value.copy(isSaving = false))
+        if (undoStack.size > 50) undoStack.removeAt(0)
         redoStack.clear()
     }
 
     fun undo() {
         if (undoStack.isNotEmpty()) {
-            redoStack.add(_uiState.value)
+            redoStack.add(_uiState.value.copy(isSaving = false))
             _uiState.value = undoStack.removeLast()
-            scheduleSave()
+            saveImmediately()
         }
     }
 
     fun redo() {
         if (redoStack.isNotEmpty()) {
-            undoStack.add(_uiState.value)
+            undoStack.add(_uiState.value.copy(isSaving = false))
             _uiState.value = redoStack.removeLast()
-            scheduleSave()
+            saveImmediately()
         }
     }
 
     private fun scheduleSave() {
         saveJob?.cancel()
+        _uiState.update { it.copy(isSaving = true) }
         saveJob = viewModelScope.launch {
-            delay(500) // Debounce auto-save
+            delay(1000)
             saveImmediately()
         }
     }
@@ -107,9 +128,12 @@ class EditorViewModel @Inject constructor(
                     isArchived = false,
                     isDeleted = false,
                     version = 0,
-                    syncStatus = SyncStatus.PENDING
+                    syncStatus = SyncStatus.PENDING,
+                    colorHex = state.colorHex,
+                    tags = state.tags
                 )
             )
+            _uiState.update { it.copy(isSaving = false) }
         }
     }
 }

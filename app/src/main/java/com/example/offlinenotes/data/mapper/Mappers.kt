@@ -8,13 +8,15 @@ import com.example.offlinenotes.domain.model.NoteVersion
 fun NoteEntity.toDomain() = Note(
     id = id, title = title, content = content, createdAt = createdAt,
     updatedAt = updatedAt, isPinned = isPinned, isArchived = isArchived,
-    isDeleted = isDeleted, version = version, syncStatus = syncStatus
+    isDeleted = isDeleted, version = version, syncStatus = syncStatus,
+    colorHex = colorHex, tags = tags
 )
 
 fun Note.toEntity() = NoteEntity(
     id = id, title = title, content = content, createdAt = createdAt,
     updatedAt = updatedAt, isPinned = isPinned, isArchived = isArchived,
-    isDeleted = isDeleted, version = version, syncStatus = syncStatus
+    isDeleted = isDeleted, version = version, syncStatus = syncStatus,
+    colorHex = colorHex, tags = tags
 )
 
 fun NoteVersionEntity.toDomain() = NoteVersion(

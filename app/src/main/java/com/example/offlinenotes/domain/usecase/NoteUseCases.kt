@@ -9,6 +9,8 @@ class NoteUseCases @Inject constructor(
     private val repository: NoteRepository
 ) {
     fun getNotes(query: String): Flow<List<Note>> = repository.getActiveNotes(query)
+    fun getArchivedNotes(): Flow<List<Note>> = repository.getArchivedNotes()
+    fun getDeletedNotes(): Flow<List<Note>> = repository.getDeletedNotes()
     fun getNoteDetails(id: String): Flow<Note?> = repository.getNoteById(id)
     fun getNoteHistory(id: String) = repository.getNoteVersions(id)
 
@@ -16,6 +18,7 @@ class NoteUseCases @Inject constructor(
     suspend fun pinNote(note: Note) = repository.saveNote(note.copy(isPinned = !note.isPinned))
     suspend fun archiveNote(note: Note) = repository.saveNote(note.copy(isArchived = !note.isArchived))
     suspend fun deleteNote(id: String) = repository.deleteNote(id)
+    suspend fun emptyTrash() = repository.emptyTrash()
 
     suspend fun restoreVersion(noteId: String, versionId: String) {
         // Find version and restore (handled via repo to track versions)

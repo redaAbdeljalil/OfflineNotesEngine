@@ -8,21 +8,37 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
 private val LightColors = lightColorScheme(
-    primary = Color(0xFF1E1E1E),
+    primary = PrimaryLight,
     onPrimary = Color.White,
-    surface = Color(0xFFF7F7F7),
-    onSurface = Color(0xFF1E1E1E),
-    background = Color(0xFFFFFFFF),
-    onBackground = Color(0xFF1E1E1E)
+    primaryContainer = SurfaceVariantLight,
+    onPrimaryContainer = PrimaryLight,
+    secondary = Info,
+    onSecondary = Color.White,
+    error = Error,
+    onError = Color.White,
+    background = Color.White,
+    onBackground = PrimaryLight,
+    surface = SurfaceLight,
+    onSurface = PrimaryLight,
+    surfaceVariant = SurfaceVariantLight,
+    onSurfaceVariant = PrimaryLight.copy(alpha = 0.7f)
 )
 
 private val DarkColors = darkColorScheme(
-    primary = Color(0xFFE0E0E0),
+    primary = PrimaryDark,
     onPrimary = Color.Black,
-    surface = Color(0xFF2C2C2C),
-    onSurface = Color(0xFFE0E0E0),
-    background = Color(0xFF121212),
-    onBackground = Color(0xFFE0E0E0)
+    primaryContainer = SurfaceVariantDark,
+    onPrimaryContainer = PrimaryDark,
+    secondary = Info,
+    onSecondary = Color.White,
+    error = Error,
+    onError = Color.White,
+    background = Color(0xFF0F172A),
+    onBackground = PrimaryDark,
+    surface = SurfaceDark,
+    onSurface = PrimaryDark,
+    surfaceVariant = SurfaceVariantDark,
+    onSurfaceVariant = PrimaryDark.copy(alpha = 0.7f)
 )
 
 @Composable
@@ -32,6 +48,7 @@ fun OfflineNotesTheme(
 ) {
     MaterialTheme(
         colorScheme = if (darkTheme) DarkColors else LightColors,
+        typography = Typography,
         content = content
     )
 }

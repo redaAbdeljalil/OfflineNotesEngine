@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.Flow
 interface NoteRepository {
     fun getActiveNotes(query: String = ""): Flow<List<Note>>
     fun getArchivedNotes(): Flow<List<Note>>
+    fun getDeletedNotes(): Flow<List<Note>>
     fun getNoteById(id: String): Flow<Note?>
     fun getNoteVersions(noteId: String): Flow<List<NoteVersion>>
 
