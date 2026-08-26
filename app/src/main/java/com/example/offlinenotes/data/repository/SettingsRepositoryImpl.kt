@@ -27,6 +27,7 @@ class SettingsRepositoryImpl @Inject constructor(
         val FONT = stringPreferencesKey("font")
         val SYNC_ENABLED = booleanPreferencesKey("sync_enabled")
         val DEFAULT_COLOR = stringPreferencesKey("default_color")
+        val ONBOARDING_COMPLETED = booleanPreferencesKey("onboarding_completed")
     }
 
     override val settings: Flow<AppSettings> = context.dataStore.data
@@ -43,7 +44,8 @@ class SettingsRepositoryImpl @Inject constructor(
                 defaultSorting = NoteSorting.valueOf(preferences[Keys.SORTING] ?: NoteSorting.UPDATED.name),
                 editorFont = EditorFont.valueOf(preferences[Keys.FONT] ?: EditorFont.SANS.name),
                 syncEnabled = preferences[Keys.SYNC_ENABLED] ?: true,
-                defaultColorHex = preferences[Keys.DEFAULT_COLOR]
+                defaultColorHex = preferences[Keys.DEFAULT_COLOR],
+                isOnboardingCompleted = preferences[Keys.ONBOARDING_COMPLETED] ?: false
             )
         }
 
@@ -68,5 +70,9 @@ class SettingsRepositoryImpl @Inject constructor(
             if (colorHex == null) it.remove(Keys.DEFAULT_COLOR)
             else it[Keys.DEFAULT_COLOR] = colorHex
         }
+    }
+
+    override suspend fun setOnboardingCompleted(completed: Boolean) {
+        context.dataStore.edit { it[Keys.ONBOARDING_COMPLETED] = completed }
     }
 }

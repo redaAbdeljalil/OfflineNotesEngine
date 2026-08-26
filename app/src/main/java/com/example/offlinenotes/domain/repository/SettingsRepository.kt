@@ -13,4 +13,5 @@ interface SettingsRepository {
     suspend fun setFont(font: EditorFont)
     suspend fun setSyncEnabled(enabled: Boolean)
     suspend fun setDefaultColor(colorHex: String?)
+    suspend fun setOnboardingCompleted(completed: Boolean)
 }

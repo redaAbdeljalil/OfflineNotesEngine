@@ -55,6 +55,10 @@ class SettingsViewModel @Inject constructor(
         repository.setDefaultColor(colorHex)
     }
 
+    fun completeOnboarding(completed: Boolean) = viewModelScope.launch {
+        repository.setOnboardingCompleted(completed)
+    }
+
     fun setBiometricEnabled(enabled: Boolean) = viewModelScope.launch {
         securityRepository.setBiometricEnabled(enabled)
     }

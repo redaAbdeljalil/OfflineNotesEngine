@@ -21,7 +21,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class MainActivity : FragmentActivity() { // Use FragmentActivity for Biometrics
+class MainActivity : FragmentActivity() { // FragmentActivity for Biometrics
 
     @Inject lateinit var settingsRepository: SettingsRepository
     @Inject lateinit var securityRepository: SecurityRepository
@@ -63,7 +63,8 @@ class MainActivity : FragmentActivity() { // Use FragmentActivity for Biometrics
 
             OfflineNotesTheme(darkTheme = darkTheme) {
                 if (isAuthenticated) {
-                    AppNavGraph()
+                    val startDestination = if (settings?.isOnboardingCompleted == true) "home" else "onboarding"
+                    AppNavGraph(startDestination = startDestination)
                 }
             }
         }

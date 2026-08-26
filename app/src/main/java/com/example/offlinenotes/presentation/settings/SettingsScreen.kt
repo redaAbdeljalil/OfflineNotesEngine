@@ -137,6 +137,12 @@ fun SettingsScreen(
             item {
                 SettingsSection("About") {
                     SettingsItem(Icons.Outlined.Info, "Version", "1.0.0-premium")
+                    SettingsItem(
+                        icon = Icons.Outlined.HelpOutline,
+                        title = "Show Onboarding",
+                        description = "Replay the feature introduction",
+                        onClick = { viewModel.completeOnboarding(false) }
+                    )
                 }
             }
         }

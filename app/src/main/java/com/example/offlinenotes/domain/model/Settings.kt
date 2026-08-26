@@ -17,5 +17,6 @@ data class AppSettings(
     val defaultSorting: NoteSorting = NoteSorting.UPDATED,
     val editorFont: EditorFont = EditorFont.SANS,
     val syncEnabled: Boolean = true,
-    val defaultColorHex: String? = null
+    val defaultColorHex: String? = null,
+    val isOnboardingCompleted: Boolean = false
 )

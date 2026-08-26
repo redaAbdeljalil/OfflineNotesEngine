@@ -13,21 +13,33 @@ import com.example.offlinenotes.presentation.archive.ArchiveScreen
 import com.example.offlinenotes.presentation.editor.EditorScreen
 import com.example.offlinenotes.presentation.history.HistoryScreen
 import com.example.offlinenotes.presentation.notes.HomeScreen
+import com.example.offlinenotes.presentation.onboarding.OnboardingScreen
 import com.example.offlinenotes.presentation.settings.SettingsScreen
 import com.example.offlinenotes.presentation.trash.TrashScreen
 
 @Composable
-fun AppNavGraph() {
+fun AppNavGraph(
+    startDestination: String = "home"
+) {
     val navController = rememberNavController()
 
     NavHost(
         navController = navController,
-        startDestination = "home",
+        startDestination = startDestination,
         enterTransition = { slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(400)) + fadeIn(animationSpec = tween(400)) },
         exitTransition = { slideOutHorizontally(targetOffsetX = { -it }, animationSpec = tween(400)) + fadeOut(animationSpec = tween(400)) },
         popEnterTransition = { slideInHorizontally(initialOffsetX = { -it }, animationSpec = tween(400)) + fadeIn(animationSpec = tween(400)) },
         popExitTransition = { slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(400)) + fadeOut(animationSpec = tween(400)) }
     ) {
+        composable("onboarding") {
+            OnboardingScreen(
+                onComplete = {
+                    navController.navigate("home") {
+                        popUpTo("onboarding") { inclusive = true }
+                    }
+                }
+            )
+        }
         composable("home") {
             HomeScreen(
                 onNoteClick = { noteId -> navController.navigate("editor/$noteId") },
