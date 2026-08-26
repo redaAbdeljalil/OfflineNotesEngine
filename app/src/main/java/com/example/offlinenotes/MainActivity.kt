@@ -148,33 +148,37 @@ class MainActivity : FragmentActivity() { // FragmentActivity for Biometrics
 
                 override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
                     super.onAuthenticationError(errorCode, errString)
-                    // If user cancels or clicks negative button, we should not grant access
+                    // Errors include user cancellation. We only grant access on success.
                     onResult(false)
                 }
 
                 override fun onAuthenticationFailed() {
                     super.onAuthenticationFailed()
-                    // This is called when a fingerprint is recognized but doesn't match. 
-                    // We don't call onResult(false) yet because the user can try again.
                 }
             })
 
-        // Check for available authenticators
-        val biometricManager = BiometricManager.from(this)
-        val canAuthenticate = biometricManager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.DEVICE_CREDENTIAL)
+        // We use BIOMETRIC_WEAK | DEVICE_CREDENTIAL to ensure compatibility across all devices
+        // This allows Fingerprint, Face ID, or the device PIN/Pattern/Password.
+        val authenticators = BiometricManager.Authenticators.BIOMETRIC_WEAK or 
+                            BiometricManager.Authenticators.DEVICE_CREDENTIAL
 
-        if (canAuthenticate == BiometricManager.BIOMETRIC_SUCCESS) {
+        val biometricManager = BiometricManager.from(this)
+        val canAuthenticate = biometricManager.canAuthenticate(authenticators)
+
+        if (canAuthenticate == BiometricManager.BIOMETRIC_SUCCESS || 
+            canAuthenticate == BiometricManager.BIOMETRIC_STATUS_UNKNOWN) {
+            
             val promptInfo = BiometricPrompt.PromptInfo.Builder()
                 .setTitle("Premium Notes Locked")
-                .setSubtitle("Authenticate to access your private notes")
-                .setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.DEVICE_CREDENTIAL)
+                .setSubtitle("Use fingerprint or your device PIN to continue")
+                .setAllowedAuthenticators(authenticators)
+                // Note: setNegativeButtonText MUST NOT be called when DEVICE_CREDENTIAL is used.
                 .build()
 
             biometricPrompt.authenticate(promptInfo)
         } else {
-            // If no biometric or PIN is set up on the device, we skip authentication but maybe warn the user
-            // Alternatively, if you want it to be strictly secure, you could return false here.
-            // For better UX, we'll allow entry if the device has no security set up at all.
+            // If the device doesn't support any form of lock (very rare), we allow entry 
+            // to prevent the user from being permanently locked out of their own notes.
             onResult(true)
         }
     }
