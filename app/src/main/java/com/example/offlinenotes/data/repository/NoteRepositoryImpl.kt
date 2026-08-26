@@ -11,22 +11,26 @@ import com.example.offlinenotes.data.mapper.toDomain
 import com.example.offlinenotes.data.mapper.toEntity
 import com.example.offlinenotes.data.sync.SyncWorker
 import com.example.offlinenotes.domain.model.Note
+import com.example.offlinenotes.domain.model.NoteSorting
 import com.example.offlinenotes.domain.model.NoteVersion
 import com.example.offlinenotes.domain.model.SyncOperationType
 import com.example.offlinenotes.domain.model.SyncStatus
 import com.example.offlinenotes.domain.repository.NoteRepository
+import com.example.offlinenotes.domain.repository.SettingsRepository
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import java.util.UUID
 import javax.inject.Inject
 
 class NoteRepositoryImpl @Inject constructor(
     private val database: OfflineNotesDatabase,
-    private val workManager: WorkManager
+    private val workManager: WorkManager,
+    private val settingsRepository: SettingsRepository
 ) : NoteRepository {
 
-    override fun getActiveNotes(query: String): Flow<List<Note>> =
-        database.noteDao.getActiveNotes(query).map { list -> list.map { it.toDomain() } }
+    override fun getActiveNotes(query: String, sorting: NoteSorting): Flow<List<Note>> =
+        database.noteDao.getActiveNotes(query, sorting.name).map { list -> list.map { it.toDomain() } }
 
     override fun getArchivedNotes(): Flow<List<Note>> =
         database.noteDao.getArchivedNotes().map { list -> list.map { it.toDomain() } }
@@ -85,6 +89,10 @@ class NoteRepositoryImpl @Inject constructor(
         database.noteDao.deleteTrash()
     }
 
+    override suspend fun triggerSync() {
+        triggerSyncWorker()
+    }
+
     private suspend fun queueSync(noteId: String, type: SyncOperationType) {
         database.syncDao.insertOperation(
             SyncOperationEntity(
@@ -94,7 +102,9 @@ class NoteRepositoryImpl @Inject constructor(
                 createdAt = System.currentTimeMillis()
             )
         )
-        triggerSyncWorker()
+        if (settingsRepository.settings.first().syncEnabled) {
+            triggerSyncWorker()
+        }
     }
 
     private fun triggerSyncWorker() {

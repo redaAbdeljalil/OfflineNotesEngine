@@ -6,7 +6,9 @@ import androidx.work.WorkManager
 import com.example.offlinenotes.data.local.OfflineNotesDatabase
 import com.example.offlinenotes.data.remote.MockRemoteDataSource
 import com.example.offlinenotes.data.repository.NoteRepositoryImpl
+import com.example.offlinenotes.data.repository.SettingsRepositoryImpl
 import com.example.offlinenotes.domain.repository.NoteRepository
+import com.example.offlinenotes.domain.repository.SettingsRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -38,9 +40,18 @@ object AppModule {
     @Singleton
     fun provideNoteRepository(
         database: OfflineNotesDatabase,
-        workManager: WorkManager
+        workManager: WorkManager,
+        settingsRepository: SettingsRepository
     ): NoteRepository {
-        return NoteRepositoryImpl(database, workManager)
+        return NoteRepositoryImpl(database, workManager, settingsRepository)
+    }
+
+    @Provides
+    @Singleton
+    fun provideSettingsRepository(
+        @ApplicationContext context: Context
+    ): SettingsRepository {
+        return SettingsRepositoryImpl(context)
     }
 
     @Provides

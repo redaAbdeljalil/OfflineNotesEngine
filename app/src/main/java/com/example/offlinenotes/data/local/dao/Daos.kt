@@ -8,8 +8,13 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface NoteDao {
-    @Query("SELECT * FROM notes WHERE isDeleted = 0 AND isArchived = 0 AND (title LIKE '%' || :query || '%' OR content LIKE '%' || :query || '%') ORDER BY isPinned DESC, updatedAt DESC")
-    fun getActiveNotes(query: String): Flow<List<NoteEntity>>
+    @Query("SELECT * FROM notes WHERE isDeleted = 0 AND isArchived = 0 AND (title LIKE '%' || :query || '%' OR content LIKE '%' || :query || '%') ORDER BY " +
+            "CASE WHEN :sort = 'PINNED' THEN isPinned END DESC, " +
+            "CASE WHEN :sort = 'UPDATED' THEN updatedAt END DESC, " +
+            "CASE WHEN :sort = 'CREATED' THEN createdAt END DESC, " +
+            "CASE WHEN :sort = 'ALPHABETICAL' THEN title END ASC, " +
+            "updatedAt DESC")
+    fun getActiveNotes(query: String, sort: String): Flow<List<NoteEntity>>
 
     @Query("SELECT * FROM notes WHERE isArchived = 1 AND isDeleted = 0 ORDER BY updatedAt DESC")
     fun getArchivedNotes(): Flow<List<NoteEntity>>

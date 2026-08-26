@@ -2,14 +2,17 @@ package com.example.offlinenotes.presentation.editor
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.offlinenotes.domain.model.EditorFont
 import com.example.offlinenotes.domain.model.Note
 import com.example.offlinenotes.domain.model.SyncStatus
+import com.example.offlinenotes.domain.repository.SettingsRepository
 import com.example.offlinenotes.domain.usecase.NoteUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.UUID
@@ -23,12 +26,14 @@ data class EditorState(
     val syncStatus: SyncStatus = SyncStatus.PENDING,
     val colorHex: String? = null,
     val tags: List<String> = emptyList(),
-    val isSaving: Boolean = false
+    val isSaving: Boolean = false,
+    val editorFont: EditorFont = EditorFont.SANS
 )
 
 @HiltViewModel
 class EditorViewModel @Inject constructor(
-    private val useCases: NoteUseCases
+    private val useCases: NoteUseCases,
+    private val settingsRepository: SettingsRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(EditorState())
@@ -38,9 +43,24 @@ class EditorViewModel @Inject constructor(
     private val redoStack = mutableListOf<EditorState>()
     private var saveJob: Job? = null
 
+    init {
+        viewModelScope.launch {
+            settingsRepository.settings.collect { settings ->
+                _uiState.update { it.copy(editorFont = settings.editorFont) }
+            }
+        }
+    }
+
     fun loadNote(noteId: String) {
         if (noteId == "new") {
-            _uiState.update { it.copy(noteId = UUID.randomUUID().toString(), isExisting = false) }
+            viewModelScope.launch {
+                val defaultColor = settingsRepository.settings.first().defaultColorHex
+                _uiState.update { it.copy(
+                    noteId = UUID.randomUUID().toString(),
+                    isExisting = false,
+                    colorHex = defaultColor
+                ) }
+            }
             return
         }
         viewModelScope.launch {

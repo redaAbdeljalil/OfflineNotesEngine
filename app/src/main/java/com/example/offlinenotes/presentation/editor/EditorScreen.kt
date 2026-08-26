@@ -17,11 +17,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.offlinenotes.domain.model.EditorFont
 import com.example.offlinenotes.presentation.components.ColorPicker
 import com.example.offlinenotes.presentation.components.TagEditor
 
@@ -36,6 +38,12 @@ fun EditorScreen(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     var showColorPicker by remember { mutableStateOf(false) }
     var showTagEditor by remember { mutableStateOf(false) }
+
+    val fontFamily = when(state.editorFont) {
+        EditorFont.SANS -> FontFamily.SansSerif
+        EditorFont.SERIF -> FontFamily.Serif
+        EditorFont.MONOSPACE -> FontFamily.Monospace
+    }
 
     LaunchedEffect(noteId) {
         viewModel.loadNote(noteId)
@@ -146,10 +154,14 @@ fun EditorScreen(
                     placeholder = { 
                         Text("Title", style = MaterialTheme.typography.displaySmall.copy(
                             fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
+                            fontFamily = fontFamily
                         )) 
                     },
-                    textStyle = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.Bold),
+                    textStyle = MaterialTheme.typography.displaySmall.copy(
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = fontFamily
+                    ),
                     colors = TextFieldDefaults.colors(
                         focusedContainerColor = Color.Transparent,
                         unfocusedContainerColor = Color.Transparent,
@@ -164,10 +176,14 @@ fun EditorScreen(
                     modifier = Modifier.fillMaxSize(),
                     placeholder = { 
                         Text("Share your thoughts...", style = MaterialTheme.typography.bodyLarge.copy(
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
+                            fontFamily = fontFamily
                         )) 
                     },
-                    textStyle = MaterialTheme.typography.bodyLarge.copy(lineHeight = 28.sp),
+                    textStyle = MaterialTheme.typography.bodyLarge.copy(
+                        lineHeight = 28.sp,
+                        fontFamily = fontFamily
+                    ),
                     colors = TextFieldDefaults.colors(
                         focusedContainerColor = Color.Transparent,
                         unfocusedContainerColor = Color.Transparent,
