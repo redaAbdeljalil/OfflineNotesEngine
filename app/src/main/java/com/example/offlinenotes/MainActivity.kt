@@ -3,11 +3,19 @@ package com.example.offlinenotes
 import android.os.Bundle
 import android.view.WindowManager
 import android.widget.Toast
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.biometric.BiometricPrompt
+import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import com.example.offlinenotes.domain.model.AppTheme
@@ -16,8 +24,6 @@ import com.example.offlinenotes.domain.repository.SettingsRepository
 import com.example.offlinenotes.presentation.navigation.AppNavGraph
 import com.example.offlinenotes.presentation.theme.OfflineNotesTheme
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -33,16 +39,28 @@ class MainActivity : FragmentActivity() { // FragmentActivity for Biometrics
 
         setContent {
             val settings by settingsRepository.settings.collectAsState(initial = null)
-            val isBiometricEnabled by securityRepository.isBiometricEnabled.collectAsState(initial = false)
+            val isBiometricEnabled by securityRepository.isBiometricEnabled.collectAsState(initial = null)
             val isScreenshotProtected by securityRepository.isScreenshotProtectionEnabled.collectAsState(initial = false)
             
-            var isAuthenticated by remember { mutableStateOf(!isBiometricEnabled) }
+            // App state management
+            var isAuthenticated by remember { mutableStateOf(false) }
+            var isAuthChecked by remember { mutableStateOf(false) }
+
+            // Determine if we are still loading initial user preferences
+            val isLoading = settings == null || isBiometricEnabled == null
 
             LaunchedEffect(isBiometricEnabled) {
-                if (isBiometricEnabled && !isAuthenticated) {
-                    showBiometricPrompt { authenticated ->
-                        isAuthenticated = authenticated
-                        if (!authenticated) finish()
+                val enabled = isBiometricEnabled
+                if (enabled != null) {
+                    if (enabled) {
+                        showBiometricPrompt { authenticated ->
+                            isAuthenticated = authenticated
+                            isAuthChecked = true
+                            if (!authenticated) finish()
+                        }
+                    } else {
+                        isAuthenticated = true
+                        isAuthChecked = true
                     }
                 }
             }
@@ -62,10 +80,49 @@ class MainActivity : FragmentActivity() { // FragmentActivity for Biometrics
             }
 
             OfflineNotesTheme(darkTheme = darkTheme) {
-                if (isAuthenticated) {
-                    val startDestination = if (settings?.isOnboardingCompleted == true) "home" else "onboarding"
-                    AppNavGraph(startDestination = startDestination)
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    if (isLoading || !isAuthChecked) {
+                        SplashScreen()
+                    } else if (isAuthenticated) {
+                        val startDestination = if (settings?.isOnboardingCompleted == true) "home" else "onboarding"
+                        AppNavGraph(startDestination = startDestination)
+                    }
                 }
+            }
+        }
+    }
+
+    @Composable
+    private fun SplashScreen() {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                // Premium Loader
+                Box(
+                    modifier = Modifier
+                        .size(64.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(32.dp),
+                        strokeWidth = 3.dp,
+                        color = MaterialTheme.colorScheme.primary,
+                        trackColor = Color.Transparent
+                    )
+                }
+                Spacer(modifier = Modifier.height(24.dp))
+                Text(
+                    text = "Syncing your thoughts...",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+                )
             }
         }
     }
@@ -87,7 +144,12 @@ class MainActivity : FragmentActivity() { // FragmentActivity for Biometrics
 
                 override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
                     super.onAuthenticationError(errorCode, errString)
-                    onResult(false)
+                    // Only exit if it's a real failure, not just a cancelation of a previous prompt
+                    if (errorCode != BiometricPrompt.ERROR_USER_CANCELED && errorCode != BiometricPrompt.ERROR_NEGATIVE_BUTTON) {
+                         onResult(false)
+                    } else {
+                        onResult(false)
+                    }
                 }
 
                 override fun onAuthenticationFailed() {
