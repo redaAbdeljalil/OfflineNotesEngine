@@ -1,6 +1,7 @@
 package com.example.offlinenotes.presentation.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -17,6 +18,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.offlinenotes.domain.model.Note
+import com.example.offlinenotes.presentation.theme.getNoteColor
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -26,8 +28,14 @@ fun NoteItem(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val backgroundColor = note.colorHex?.let { Color(android.graphics.Color.parseColor(it)) }
-        ?: MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+    val isDark = isSystemInDarkTheme()
+    val noteColor = getNoteColor(note.colorHex, isDark)
+    
+    val backgroundColor = if (noteColor == Color.Transparent) {
+        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+    } else {
+        noteColor
+    }
 
     PremiumCard(
         onClick = onClick,

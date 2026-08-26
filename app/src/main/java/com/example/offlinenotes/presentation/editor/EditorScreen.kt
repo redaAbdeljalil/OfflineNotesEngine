@@ -1,13 +1,11 @@
 package com.example.offlinenotes.presentation.editor
 
 import androidx.compose.animation.*
-import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.outlined.ColorLens
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.LocalOffer
 import androidx.compose.material.icons.outlined.Palette
@@ -26,6 +24,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.offlinenotes.domain.model.EditorFont
 import com.example.offlinenotes.presentation.components.ColorPicker
 import com.example.offlinenotes.presentation.components.TagEditor
+import com.example.offlinenotes.presentation.theme.getNoteColor
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -39,6 +38,21 @@ fun EditorScreen(
     var showColorPicker by remember { mutableStateOf(false) }
     var showTagEditor by remember { mutableStateOf(false) }
 
+    val isDark = isSystemInDarkTheme()
+    val noteColor = getNoteColor(state.colorHex, isDark)
+    
+    val backgroundColor = if (noteColor == Color.Transparent) {
+        MaterialTheme.colorScheme.background
+    } else {
+        noteColor
+    }
+
+    val contentColor = if (noteColor != Color.Transparent) {
+        if (isDark) Color.White else Color.Black
+    } else {
+        MaterialTheme.colorScheme.onBackground
+    }
+
     val fontFamily = when(state.editorFont) {
         EditorFont.SANS -> FontFamily.SansSerif
         EditorFont.SERIF -> FontFamily.Serif
@@ -49,11 +63,9 @@ fun EditorScreen(
         viewModel.loadNote(noteId)
     }
 
-    val backgroundColor = state.colorHex?.let { Color(android.graphics.Color.parseColor(it)) }
-        ?: MaterialTheme.colorScheme.background
-
     Scaffold(
         containerColor = backgroundColor,
+        contentColor = contentColor,
         topBar = {
             TopAppBar(
                 title = {
@@ -61,14 +73,16 @@ fun EditorScreen(
                         if (state.isSaving) {
                             CircularProgressIndicator(
                                 modifier = Modifier.size(16.dp),
-                                strokeWidth = 2.dp
+                                strokeWidth = 2.dp,
+                                color = contentColor
                             )
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text("Saving...", style = MaterialTheme.typography.labelSmall)
+                            Text("Saving...", style = MaterialTheme.typography.labelSmall, color = contentColor)
                         } else {
                             Text(
                                 text = if (state.isExisting) "Edit Note" else "New Note",
-                                style = MaterialTheme.typography.titleMedium
+                                style = MaterialTheme.typography.titleMedium,
+                                color = contentColor
                             )
                         }
                     }
@@ -77,14 +91,14 @@ fun EditorScreen(
                     IconButton(onClick = {
                         viewModel.saveImmediately()
                         onNavigateBack()
-                    }) { Icon(Icons.Default.ArrowBack, "Back") }
+                    }) { Icon(Icons.Default.ArrowBack, "Back", tint = contentColor) }
                 },
                 actions = {
-                    IconButton(onClick = viewModel::undo) { Icon(Icons.Default.Undo, "Undo") }
-                    IconButton(onClick = viewModel::redo) { Icon(Icons.Default.Redo, "Redo") }
+                    IconButton(onClick = viewModel::undo) { Icon(Icons.Default.Undo, "Undo", tint = contentColor) }
+                    IconButton(onClick = viewModel::redo) { Icon(Icons.Default.Redo, "Redo", tint = contentColor) }
                     if (state.isExisting) {
                         IconButton(onClick = { onViewHistory(state.noteId) }) {
-                            Icon(Icons.Outlined.History, "History")
+                            Icon(Icons.Outlined.History, "History", tint = contentColor)
                         }
                     }
                 },
@@ -93,7 +107,8 @@ fun EditorScreen(
         },
         bottomBar = {
             BottomAppBar(
-                containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f),
+                containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f),
+                contentColor = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
             ) {
                 IconButton(onClick = { 
@@ -154,19 +169,22 @@ fun EditorScreen(
                     placeholder = { 
                         Text("Title", style = MaterialTheme.typography.displaySmall.copy(
                             fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
+                            color = contentColor.copy(alpha = 0.3f),
                             fontFamily = fontFamily
                         )) 
                     },
                     textStyle = MaterialTheme.typography.displaySmall.copy(
                         fontWeight = FontWeight.Bold,
-                        fontFamily = fontFamily
+                        fontFamily = fontFamily,
+                        color = contentColor
                     ),
                     colors = TextFieldDefaults.colors(
                         focusedContainerColor = Color.Transparent,
                         unfocusedContainerColor = Color.Transparent,
                         focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent
+                        unfocusedIndicatorColor = Color.Transparent,
+                        focusedTextColor = contentColor,
+                        unfocusedTextColor = contentColor
                     )
                 )
                 
@@ -176,19 +194,22 @@ fun EditorScreen(
                     modifier = Modifier.fillMaxSize(),
                     placeholder = { 
                         Text("Share your thoughts...", style = MaterialTheme.typography.bodyLarge.copy(
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
+                            color = contentColor.copy(alpha = 0.3f),
                             fontFamily = fontFamily
                         )) 
                     },
                     textStyle = MaterialTheme.typography.bodyLarge.copy(
                         lineHeight = 28.sp,
-                        fontFamily = fontFamily
+                        fontFamily = fontFamily,
+                        color = contentColor
                     ),
                     colors = TextFieldDefaults.colors(
                         focusedContainerColor = Color.Transparent,
                         unfocusedContainerColor = Color.Transparent,
                         focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent
+                        unfocusedIndicatorColor = Color.Transparent,
+                        focusedTextColor = contentColor,
+                        unfocusedTextColor = contentColor
                     )
                 )
             }

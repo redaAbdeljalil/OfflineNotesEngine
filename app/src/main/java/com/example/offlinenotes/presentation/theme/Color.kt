@@ -27,6 +27,17 @@ val NoteGreenDark = Color(0xFF064E3B)
 val NotePurpleDark = Color(0xFF581C87)
 val NoteRoseDark = Color(0xFF881337)
 
+fun getNoteColor(hex: String?, isDark: Boolean): Color {
+    return when (hex) {
+        "#FEF3C7" -> if (isDark) NoteWarmDark else NoteWarm
+        "#DBEAFE" -> if (isDark) NoteBlueDark else NoteBlue
+        "#DCFCE7" -> if (isDark) NoteGreenDark else NoteGreen
+        "#F3E8FF" -> if (isDark) NotePurpleDark else NotePurple
+        "#FFE4E6" -> if (isDark) NoteRoseDark else NoteRose
+        else -> Color.Transparent
+    }
+}
+
 // Functional Colors
 val Error = Color(0xFFBA1A1A)
 val Success = Color(0xFF2D6A4F)
