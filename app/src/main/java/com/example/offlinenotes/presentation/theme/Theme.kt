@@ -33,12 +33,12 @@ private val DarkColors = darkColorScheme(
     onSecondary = Color.White,
     error = Error,
     onError = Color.White,
-    background = Color(0xFF0F172A),
+    background = BackgroundDark,
     onBackground = PrimaryDark,
     surface = SurfaceDark,
     onSurface = PrimaryDark,
     surfaceVariant = SurfaceVariantDark,
-    onSurfaceVariant = PrimaryDark.copy(alpha = 0.7f)
+    onSurfaceVariant = PrimaryDark.copy(alpha = 0.8f)
 )
 
 @Composable

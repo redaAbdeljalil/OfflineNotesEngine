@@ -27,7 +27,7 @@ fun NoteItem(
     modifier: Modifier = Modifier
 ) {
     val backgroundColor = note.colorHex?.let { Color(android.graphics.Color.parseColor(it)) }
-        ?: MaterialTheme.colorScheme.surface
+        ?: MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
 
     PremiumCard(
         onClick = onClick,

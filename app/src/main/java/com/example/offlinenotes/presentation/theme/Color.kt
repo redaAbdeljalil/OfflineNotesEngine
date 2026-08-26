@@ -9,8 +9,9 @@ val PrimaryDark = Color(0xFFE2E2E6)
 // Surface Colors
 val SurfaceLight = Color(0xFFF8FAFC)
 val SurfaceVariantLight = Color(0xFFE2E8F0)
-val SurfaceDark = Color(0xFF0F172A)
-val SurfaceVariantDark = Color(0xFF1E293B)
+val SurfaceDark = Color(0xFF1E293B)
+val SurfaceVariantDark = Color(0xFF334155)
+val BackgroundDark = Color(0xFF0F172A)
 
 // Accent Colors for Notes (Tasteful Pastels / Deep Tones)
 val NoteDefault = Color.Transparent

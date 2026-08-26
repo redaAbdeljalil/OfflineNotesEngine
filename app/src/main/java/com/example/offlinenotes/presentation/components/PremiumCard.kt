@@ -1,8 +1,7 @@
 package com.example.offlinenotes.presentation.components
 
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -19,13 +18,18 @@ fun PremiumCard(
     onClick: (() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit
 ) {
+    val border = if (MaterialTheme.colorScheme.surface == Color(0xFF1E293B)) { // Simple dark mode check
+        BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.1f))
+    } else null
+
     if (onClick != null) {
         Card(
             onClick = onClick,
             modifier = modifier,
             shape = RoundedCornerShape(24.dp),
             colors = CardDefaults.cardColors(containerColor = containerColor),
-            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+            border = border
         ) {
             content()
         }
@@ -34,7 +38,8 @@ fun PremiumCard(
             modifier = modifier,
             shape = RoundedCornerShape(24.dp),
             colors = CardDefaults.cardColors(containerColor = containerColor),
-            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+            border = border
         ) {
             content()
         }
