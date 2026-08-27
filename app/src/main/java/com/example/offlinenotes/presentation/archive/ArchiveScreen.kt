@@ -17,6 +17,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.offlinenotes.presentation.components.EmptyState
 import com.example.offlinenotes.presentation.components.NoteItem
 
+import androidx.compose.ui.res.stringResource
+import com.example.offlinenotes.R
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ArchiveScreen(
@@ -29,9 +32,9 @@ fun ArchiveScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Archive") },
+                title = { Text(stringResource(R.string.archive_title)) },
                 navigationIcon = {
-                    IconButton(onClick = onNavigateBack) { Icon(Icons.Default.ArrowBack, "Back") }
+                    IconButton(onClick = onNavigateBack) { Icon(Icons.Default.ArrowBack, stringResource(R.string.common_back)) }
                 }
             )
         }
@@ -39,8 +42,8 @@ fun ArchiveScreen(
         if (notes.isEmpty()) {
             EmptyState(
                 icon = Icons.Outlined.Archive,
-                title = "Archive is empty",
-                description = "Notes you archive will appear here.",
+                title = stringResource(R.string.archive_empty_title),
+                description = stringResource(R.string.archive_empty_desc),
                 modifier = Modifier.padding(padding)
             )
         } else {

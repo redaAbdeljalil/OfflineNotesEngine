@@ -29,6 +29,9 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+import androidx.compose.ui.res.stringResource
+import com.example.offlinenotes.R
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HistoryScreen(
@@ -44,9 +47,9 @@ fun HistoryScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Version Timeline", style = MaterialTheme.typography.titleLarge) },
+                title = { Text(stringResource(R.string.history_title), style = MaterialTheme.typography.titleLarge) },
                 navigationIcon = {
-                    IconButton(onClick = onNavigateBack) { Icon(Icons.Default.ArrowBack, "Back") }
+                    IconButton(onClick = onNavigateBack) { Icon(Icons.Default.ArrowBack, stringResource(R.string.common_back)) }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
             )
@@ -55,8 +58,8 @@ fun HistoryScreen(
         if (versions.isEmpty()) {
             EmptyState(
                 icon = Icons.Outlined.History,
-                title = "No history yet",
-                description = "Changes will appear here as you edit your notes.",
+                title = stringResource(R.string.history_empty_title),
+                description = stringResource(R.string.history_empty_desc),
                 modifier = Modifier.padding(padding)
             )
         } else {
@@ -80,17 +83,17 @@ fun HistoryScreen(
     if (showRestoreDialog != null) {
         AlertDialog(
             onDismissRequest = { showRestoreDialog = null },
-            title = { Text("Restore Version") },
-            text = { Text("Are you sure you want to restore this version? This will be added as a new entry in your timeline.") },
+            title = { Text(stringResource(R.string.history_dialog_restore_title)) },
+            text = { Text(stringResource(R.string.history_dialog_restore_desc)) },
             confirmButton = {
                 TextButton(onClick = {
                     showRestoreDialog?.let { viewModel.restore(noteId, it.id) }
                     showRestoreDialog = null
                     onNavigateBack()
-                }) { Text("Restore") }
+                }) { Text(stringResource(R.string.common_restore)) }
             },
             dismissButton = {
-                TextButton(onClick = { showRestoreDialog = null }) { Text("Cancel") }
+                TextButton(onClick = { showRestoreDialog = null }) { Text(stringResource(R.string.common_cancel)) }
             },
             shape = RoundedCornerShape(28.dp)
         )

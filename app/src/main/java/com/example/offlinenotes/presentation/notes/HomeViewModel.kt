@@ -11,6 +11,12 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+data class HomeUiState(
+    val notes: List<Note> = emptyList(),
+    val searchQuery: String = "",
+    val isLoading: Boolean = false
+)
+
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val useCases: NoteUseCases,
@@ -18,16 +24,21 @@ class HomeViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _searchQuery = MutableStateFlow("")
-    val searchQuery = _searchQuery.asStateFlow()
-
-    val notes: StateFlow<List<Note>> = combine(
+    
+    val uiState: StateFlow<HomeUiState> = combine(
         _searchQuery,
         settingsRepository.settings
     ) { query, settings ->
         query to settings.defaultSorting
     }.flatMapLatest { (query, sorting) ->
-        useCases.getNotes(query, sorting)
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+        useCases.getNotes(query, sorting).map { notes ->
+            HomeUiState(notes = notes, searchQuery = query)
+        }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = HomeUiState(isLoading = true)
+    )
 
     fun updateSearchQuery(query: String) {
         _searchQuery.value = query

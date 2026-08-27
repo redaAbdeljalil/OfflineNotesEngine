@@ -10,6 +10,7 @@ import com.example.offlinenotes.data.local.entity.SyncOperationEntity
 import com.example.offlinenotes.data.mapper.toDomain
 import com.example.offlinenotes.data.mapper.toEntity
 import com.example.offlinenotes.data.sync.SyncWorker
+import com.example.offlinenotes.di.IoDispatcher
 import com.example.offlinenotes.domain.model.Note
 import com.example.offlinenotes.domain.model.NoteSorting
 import com.example.offlinenotes.domain.model.NoteVersion
@@ -17,16 +18,19 @@ import com.example.offlinenotes.domain.model.SyncOperationType
 import com.example.offlinenotes.domain.model.SyncStatus
 import com.example.offlinenotes.domain.repository.NoteRepository
 import com.example.offlinenotes.domain.repository.SettingsRepository
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
 import java.util.UUID
 import javax.inject.Inject
 
 class NoteRepositoryImpl @Inject constructor(
     private val database: OfflineNotesDatabase,
     private val workManager: WorkManager,
-    private val settingsRepository: SettingsRepository
+    private val settingsRepository: SettingsRepository,
+    @IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) : NoteRepository {
 
     override fun getActiveNotes(query: String, sorting: NoteSorting): Flow<List<Note>> =
@@ -44,14 +48,12 @@ class NoteRepositoryImpl @Inject constructor(
     override fun getNoteVersions(noteId: String): Flow<List<NoteVersion>> =
         database.versionDao.getVersionsForNote(noteId).map { list -> list.map { it.toDomain() } }
 
-    override suspend fun saveNote(note: Note) {
+    override suspend fun saveNote(note: Note) = withContext(ioDispatcher) {
         val oldNote = database.noteDao.getNoteByIdSync(note.id)
 
-        // Optimistic UI: Save locally as PENDING immediately for zero-lag feedback
         val pendingNote = note.copy(syncStatus = SyncStatus.PENDING, updatedAt = System.currentTimeMillis())
         database.noteDao.insertNote(pendingNote.toEntity())
 
-        // Preserve note history if meaningful content changed
         if (oldNote != null && (oldNote.content != note.content || oldNote.title != note.title)) {
             database.versionDao.insertVersion(
                 NoteVersion(
@@ -65,17 +67,16 @@ class NoteRepositoryImpl @Inject constructor(
             )
         }
 
-        // Queue synchronization operation
         queueSync(note.id, if (oldNote == null) SyncOperationType.CREATE else SyncOperationType.UPDATE)
     }
 
-    override suspend fun deleteNote(id: String) {
+    override suspend fun deleteNote(id: String) = withContext(ioDispatcher) {
         database.noteDao.markDeleted(id, SyncStatus.PENDING.name, System.currentTimeMillis())
         queueSync(id, SyncOperationType.DELETE)
     }
 
-    override suspend fun restoreVersion(version: NoteVersion) {
-        val current = database.noteDao.getNoteByIdSync(version.noteId) ?: return
+    override suspend fun restoreVersion(version: NoteVersion) = withContext(ioDispatcher) {
+        val current = database.noteDao.getNoteByIdSync(version.noteId) ?: return@withContext
         val restoredNote = current.copy(
             title = version.title,
             content = version.content,
@@ -85,7 +86,7 @@ class NoteRepositoryImpl @Inject constructor(
         saveNote(restoredNote.toDomain()) 
     }
 
-    override suspend fun emptyTrash() {
+    override suspend fun emptyTrash() = withContext(ioDispatcher) {
         database.noteDao.deleteTrash()
     }
 

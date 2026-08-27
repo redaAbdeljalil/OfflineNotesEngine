@@ -12,11 +12,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.offlinenotes.R
 import com.example.offlinenotes.domain.model.AppTheme
 import com.example.offlinenotes.domain.model.EditorFont
 import com.example.offlinenotes.domain.model.NoteSorting
@@ -42,9 +44,9 @@ fun SettingsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Settings", style = MaterialTheme.typography.titleLarge) },
+                title = { Text(stringResource(R.string.settings_title), style = MaterialTheme.typography.titleLarge) },
                 navigationIcon = {
-                    IconButton(onClick = onNavigateBack) { Icon(Icons.Default.ArrowBack, "Back") }
+                    IconButton(onClick = onNavigateBack) { Icon(Icons.Default.ArrowBack, stringResource(R.string.common_back)) }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
             )
@@ -58,17 +60,17 @@ fun SettingsScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             item {
-                SettingsSection("Appearance") {
+                SettingsSection(stringResource(R.string.settings_section_appearance)) {
                     SettingsItem(
                         icon = Icons.Outlined.DarkMode,
-                        title = "Dark Mode",
+                        title = stringResource(R.string.settings_item_dark_mode),
                         description = settings.theme.name.lowercase().replaceFirstChar { it.uppercase() },
                         onClick = { showThemeDialog = true }
                     )
                     SettingsItem(
                         icon = Icons.Outlined.Palette,
-                        title = "Default Note Color",
-                        description = "Choose color for new notes",
+                        title = stringResource(R.string.settings_item_default_color),
+                        description = stringResource(R.string.settings_item_default_color_desc),
                         onClick = { showColorPicker = !showColorPicker }
                     )
                     if (showColorPicker) {
@@ -80,28 +82,28 @@ fun SettingsScreen(
                 }
             }
             item {
-                SettingsSection("Security") {
+                SettingsSection(stringResource(R.string.settings_section_security)) {
                     SettingsToggleItem(
                         icon = Icons.Outlined.Fingerprint,
-                        title = "Biometric Lock",
-                        description = "Lock app with fingerprint/face",
+                        title = stringResource(R.string.settings_item_biometric),
+                        description = stringResource(R.string.settings_item_biometric_desc),
                         checked = isBiometricEnabled,
                         onCheckedChange = viewModel::setBiometricEnabled
                     )
                     SettingsToggleItem(
                         icon = Icons.Outlined.Security,
-                        title = "Screenshot Protection",
-                        description = "Prevent screenshots of your notes",
+                        title = stringResource(R.string.settings_item_screenshot),
+                        description = stringResource(R.string.settings_item_screenshot_desc),
                         checked = isScreenshotProtected,
                         onCheckedChange = viewModel::setScreenshotProtection
                     )
                 }
             }
             item {
-                SettingsSection("Notes") {
+                SettingsSection(stringResource(R.string.settings_section_notes)) {
                     SettingsItem(
                         icon = Icons.Outlined.Sort,
-                        title = "Default Sorting",
+                        title = stringResource(R.string.settings_item_sorting),
                         description = when(settings.defaultSorting) {
                             NoteSorting.UPDATED -> "Recently updated"
                             NoteSorting.CREATED -> "Recently created"
@@ -112,35 +114,37 @@ fun SettingsScreen(
                     )
                     SettingsItem(
                         icon = Icons.Outlined.TextFields,
-                        title = "Editor Font",
+                        title = stringResource(R.string.settings_item_font),
                         description = settings.editorFont.name.lowercase().replaceFirstChar { it.uppercase() },
                         onClick = { showFontDialog = true }
                     )
                 }
             }
             item {
-                SettingsSection("Storage & Sync") {
+                SettingsSection(stringResource(R.string.settings_section_sync)) {
                     SettingsItem(
                         icon = if (settings.syncEnabled) Icons.Outlined.Sync else Icons.Outlined.SyncDisabled,
-                        title = "Synchronization",
-                        description = if (settings.syncEnabled) "Automatically syncing" else "Sync disabled",
+                        title = stringResource(R.string.settings_item_sync),
+                        description = if (settings.syncEnabled) 
+                            stringResource(R.string.settings_item_sync_on) 
+                        else stringResource(R.string.settings_item_sync_off),
                         onClick = { viewModel.setSyncEnabled(!settings.syncEnabled) }
                     )
                     SettingsItem(
                         icon = Icons.Outlined.Delete,
-                        title = "Trash",
-                        description = "Manage deleted notes",
+                        title = stringResource(R.string.settings_item_trash),
+                        description = stringResource(R.string.settings_item_trash_desc),
                         onClick = onTrashClick
                     )
                 }
             }
             item {
-                SettingsSection("About") {
-                    SettingsItem(Icons.Outlined.Info, "Version", "1.0.0-premium")
+                SettingsSection(stringResource(R.string.settings_section_about)) {
+                    SettingsItem(Icons.Outlined.Info, stringResource(R.string.settings_item_version), "1.0.0-premium")
                     SettingsItem(
                         icon = Icons.Outlined.HelpOutline,
-                        title = "Show Onboarding",
-                        description = "Replay the feature introduction",
+                        title = stringResource(R.string.settings_item_show_onboarding),
+                        description = stringResource(R.string.settings_item_show_onboarding_desc),
                         onClick = { viewModel.completeOnboarding(false) }
                     )
                 }
@@ -214,7 +218,7 @@ fun <T> SettingsSelectionDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel") }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) }
         },
         shape = RoundedCornerShape(28.dp)
     )

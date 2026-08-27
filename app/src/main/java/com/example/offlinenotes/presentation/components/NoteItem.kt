@@ -17,6 +17,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
+import com.example.offlinenotes.R
 import com.example.offlinenotes.domain.model.Note
 import com.example.offlinenotes.presentation.theme.getNoteColor
 import java.text.SimpleDateFormat
@@ -55,7 +57,7 @@ fun NoteItem(
                 if (note.isPinned) {
                     androidx.compose.material3.Icon(
                         imageVector = Icons.Default.PushPin,
-                        contentDescription = "Pinned",
+                        contentDescription = stringResource(R.string.home_section_pinned),
                         modifier = Modifier.size(16.dp),
                         tint = MaterialTheme.colorScheme.primary
                     )

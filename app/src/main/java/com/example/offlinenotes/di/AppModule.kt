@@ -16,6 +16,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.CoroutineDispatcher
 import net.sqlcipher.database.SupportFactory
 import javax.inject.Singleton
 
@@ -36,7 +37,6 @@ object AppModule {
         securityRepository: SecurityRepository
     ): OfflineNotesDatabase {
         val dbName = "offline_notes_premium_db" 
-        // Initializing SQLCipher factory with our master passphrase for at-rest encryption
         val factory = SupportFactory(securityRepository.getDatabasePassphrase())
         return Room.databaseBuilder(
             context,
@@ -59,9 +59,10 @@ object AppModule {
     fun provideNoteRepository(
         database: OfflineNotesDatabase,
         workManager: WorkManager,
-        settingsRepository: SettingsRepository
+        settingsRepository: SettingsRepository,
+        @IoDispatcher ioDispatcher: CoroutineDispatcher
     ): NoteRepository {
-        return NoteRepositoryImpl(database, workManager, settingsRepository)
+        return NoteRepositoryImpl(database, workManager, settingsRepository, ioDispatcher)
     }
 
     @Provides

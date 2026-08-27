@@ -1,3 +1,86 @@
 <resources>
-    <string name="app_name">OfflineNotesEngine</string>
+    <string name="app_name">Premium Notes</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_offline_title">Offline First</string>
+    <string name="onboarding_offline_desc">Your thoughts belong to you. Notes are stored locally and sync automatically when you\'re online.</string>
+    <string name="onboarding_security_title">Military-Grade Security</string>
+    <string name="onboarding_security_desc">Everything is encrypted at rest. Protect your private notes with Biometric Fingerprint or Face ID.</string>
+    <string name="onboarding_history_title">Time Machine</string>
+    <string name="onboarding_history_desc">Never lose a change. Browse your note\'s history and restore any version with a single tap.</string>
+    <string name="onboarding_next">Next</string>
+    <string name="onboarding_get_started">Get Started</string>
+
+    <!-- Home -->
+    <string name="home_title">My Notes</string>
+    <string name="home_search_placeholder">Search your thoughts...</string>
+    <string name="home_new_note">New Note</string>
+    <string name="home_no_notes_title">No notes yet</string>
+    <string name="home_no_notes_desc">Tap the + button to create your first premium note.</string>
+    <string name="home_no_results_title">No results found</string>
+    <string name="home_no_results_desc">We couldn\'t find any notes matching \"%1$s\".</string>
+    <string name="home_section_pinned">Pinned</string>
+    <string name="home_section_recent">Recent</string>
+    <string name="home_section_all">All Notes</string>
+
+    <!-- Editor -->
+    <string name="editor_edit_title">Edit Note</string>
+    <string name="editor_new_title">New Note</string>
+    <string name="editor_saving">Saving...</string>
+    <string name="editor_title_hint">Title</string>
+    <string name="editor_content_hint">Share your thoughts...</string>
+    <string name="editor_tag_hint">Add tag...</string>
+    <string name="editor_char_count">%1$d characters</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_section_appearance">Appearance</string>
+    <string name="settings_item_dark_mode">Dark Mode</string>
+    <string name="settings_item_default_color">Default Note Color</string>
+    <string name="settings_item_default_color_desc">Choose color for new notes</string>
+    <string name="settings_section_notes">Notes</string>
+    <string name="settings_item_sorting">Default Sorting</string>
+    <string name="settings_item_font">Editor Font</string>
+    <string name="settings_section_security">Security</string>
+    <string name="settings_item_biometric">Biometric Lock</string>
+    <string name="settings_item_biometric_desc">Lock app with fingerprint/face</string>
+    <string name="settings_item_screenshot">Screenshot Protection</string>
+    <string name="settings_item_screenshot_desc">Prevent screenshots of your notes</string>
+    <string name="settings_section_sync">Storage &amp; Sync</string>
+    <string name="settings_item_sync">Synchronization</string>
+    <string name="settings_item_sync_on">Automatically syncing</string>
+    <string name="settings_item_sync_off">Sync disabled</string>
+    <string name="settings_item_trash">Trash</string>
+    <string name="settings_item_trash_desc">Manage deleted notes</string>
+    <string name="settings_section_about">About</string>
+    <string name="settings_item_version">Version</string>
+    <string name="settings_item_show_onboarding">Show Onboarding</string>
+    <string name="settings_item_show_onboarding_desc">Replay the feature introduction</string>
+
+    <!-- Trash -->
+    <string name="trash_title">Trash</string>
+    <string name="trash_empty_title">Trash is empty</string>
+    <string name="trash_empty_desc">Deleted notes will stay here for a while.</string>
+    <string name="trash_dialog_empty_title">Empty Trash?</string>
+    <string name="trash_dialog_empty_desc">All notes in trash will be permanently deleted. This action cannot be undone.</string>
+
+    <!-- Archive -->
+    <string name="archive_title">Archive</string>
+    <string name="archive_empty_title">Archive is empty</string>
+    <string name="archive_empty_desc">Notes you archive will appear here.</string>
+
+    <!-- History -->
+    <string name="history_title">Version Timeline</string>
+    <string name="history_empty_title">No history yet</string>
+    <string name="history_empty_desc">Changes will appear here as you edit your notes.</string>
+    <string name="history_dialog_restore_title">Restore Version</string>
+    <string name="history_dialog_restore_desc">Are you sure you want to restore this version? This will be added as a new entry in your timeline.</string>
+
+    <!-- General -->
+    <string name="common_back">Back</string>
+    <string name="common_cancel">Cancel</string>
+    <string name="common_restore">Restore</string>
+    <string name="common_delete">Delete</string>
+    <string name="common_later">Later</string>
+    <string name="common_open_settings">Open Settings</string>
 </resources>

@@ -1,5 +1,7 @@
 package com.example.offlinenotes.domain.model
 
+import androidx.compose.runtime.Immutable
+
 enum class SyncStatus {
     SYNCED, PENDING, ERROR, CONFLICT
 }
@@ -8,6 +10,7 @@ enum class SyncOperationType {
     CREATE, UPDATE, DELETE
 }
 
+@Immutable
 data class Note(
     val id: String,
     val title: String,
@@ -23,6 +26,7 @@ data class Note(
     val tags: List<String> = emptyList()
 )
 
+@Immutable
 data class NoteVersion(
     val id: String,
     val noteId: String,

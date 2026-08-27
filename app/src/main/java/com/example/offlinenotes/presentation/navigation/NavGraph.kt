@@ -19,11 +19,10 @@ import com.example.offlinenotes.presentation.trash.TrashScreen
 
 @Composable
 fun AppNavGraph(
-    startDestination: String = "home"
+    startDestination: String = Screen.Home.route
 ) {
     val navController = rememberNavController()
 
-    // Centralized Navigation Graph with high-end slide/fade transitions
     NavHost(
         navController = navController,
         startDestination = startDestination,
@@ -32,51 +31,51 @@ fun AppNavGraph(
         popEnterTransition = { slideInHorizontally(initialOffsetX = { -it }, animationSpec = tween(400)) + fadeIn(animationSpec = tween(400)) },
         popExitTransition = { slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(400)) + fadeOut(animationSpec = tween(400)) }
     ) {
-        composable("onboarding") {
+        composable(Screen.Onboarding.route) {
             OnboardingScreen(
                 onComplete = {
-                    navController.navigate("home") {
-                        popUpTo("onboarding") { inclusive = true }
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Onboarding.route) { inclusive = true }
                     }
                 }
             )
         }
-        composable("home") {
+        composable(Screen.Home.route) {
             HomeScreen(
-                onNoteClick = { noteId -> navController.navigate("editor/$noteId") },
-                onCreateNote = { navController.navigate("editor/new") },
-                onSettingsClick = { navController.navigate("settings") },
-                onArchiveClick = { navController.navigate("archive") }
+                onNoteClick = { noteId -> navController.navigate(Screen.Editor.createRoute(noteId)) },
+                onCreateNote = { navController.navigate(Screen.Editor.createRoute("new")) },
+                onSettingsClick = { navController.navigate(Screen.Settings.route) },
+                onArchiveClick = { navController.navigate(Screen.Archive.route) }
             )
         }
-        composable("editor/{noteId}") { backStackEntry ->
+        composable(Screen.Editor.route) { backStackEntry ->
             val noteId = backStackEntry.arguments?.getString("noteId") ?: "new"
             EditorScreen(
                 noteId = noteId,
                 onNavigateBack = { navController.popBackStack() },
-                onViewHistory = { id -> navController.navigate("history/$id") }
+                onViewHistory = { id -> navController.navigate(Screen.History.createRoute(id)) }
             )
         }
-        composable("history/{noteId}") { backStackEntry ->
+        composable(Screen.History.route) { backStackEntry ->
             val noteId = backStackEntry.arguments?.getString("noteId") ?: return@composable
             HistoryScreen(
                 noteId = noteId,
                 onNavigateBack = { navController.popBackStack() }
             )
         }
-        composable("archive") {
+        composable(Screen.Archive.route) {
             ArchiveScreen(
                 onNavigateBack = { navController.popBackStack() },
-                onNoteClick = { noteId -> navController.navigate("editor/$noteId") }
+                onNoteClick = { noteId -> navController.navigate(Screen.Editor.createRoute(noteId)) }
             )
         }
-        composable("settings") {
+        composable(Screen.Settings.route) {
             SettingsScreen(
                 onNavigateBack = { navController.popBackStack() },
-                onTrashClick = { navController.navigate("trash") }
+                onTrashClick = { navController.navigate(Screen.Trash.route) }
             )
         }
-        composable("trash") {
+        composable(Screen.Trash.route) {
             TrashScreen(
                 onNavigateBack = { navController.popBackStack() }
             )

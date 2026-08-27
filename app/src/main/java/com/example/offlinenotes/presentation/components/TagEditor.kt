@@ -20,6 +20,9 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 
+import androidx.compose.ui.res.stringResource
+import com.example.offlinenotes.R
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TagEditor(
@@ -86,7 +89,7 @@ fun TagEditor(
                 decorationBox = { innerTextField ->
                     if (tagText.isEmpty()) {
                         Text(
-                            "Add tag...",
+                            text = stringResource(R.string.editor_tag_hint),
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
                         )

@@ -26,6 +26,9 @@ import com.example.offlinenotes.presentation.components.ColorPicker
 import com.example.offlinenotes.presentation.components.TagEditor
 import com.example.offlinenotes.presentation.theme.getNoteColor
 
+import androidx.compose.ui.res.stringResource
+import com.example.offlinenotes.R
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditorScreen(
@@ -77,10 +80,10 @@ fun EditorScreen(
                                 color = contentColor
                             )
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text("Saving...", style = MaterialTheme.typography.labelSmall, color = contentColor)
+                            Text(stringResource(R.string.editor_saving), style = MaterialTheme.typography.labelSmall, color = contentColor)
                         } else {
                             Text(
-                                text = if (state.isExisting) "Edit Note" else "New Note",
+                                text = if (state.isExisting) stringResource(R.string.editor_edit_title) else stringResource(R.string.editor_new_title),
                                 style = MaterialTheme.typography.titleMedium,
                                 color = contentColor
                             )
@@ -91,7 +94,7 @@ fun EditorScreen(
                     IconButton(onClick = {
                         viewModel.saveImmediately()
                         onNavigateBack()
-                    }) { Icon(Icons.Default.ArrowBack, "Back", tint = contentColor) }
+                    }) { Icon(Icons.Default.ArrowBack, stringResource(R.string.common_back), tint = contentColor) }
                 },
                 actions = {
                     IconButton(onClick = viewModel::undo) { Icon(Icons.Default.Undo, "Undo", tint = contentColor) }
@@ -125,7 +128,7 @@ fun EditorScreen(
                 }
                 Spacer(modifier = Modifier.weight(1f))
                 Text(
-                    text = "${state.content.length} characters",
+                    text = stringResource(R.string.editor_char_count, state.content.length),
                     style = MaterialTheme.typography.labelSmall,
                     modifier = Modifier.padding(end = 16.dp)
                 )
@@ -167,7 +170,7 @@ fun EditorScreen(
                     onValueChange = viewModel::onTitleChange,
                     modifier = Modifier.fillMaxWidth(),
                     placeholder = { 
-                        Text("Title", style = MaterialTheme.typography.displaySmall.copy(
+                        Text(stringResource(R.string.editor_title_hint), style = MaterialTheme.typography.displaySmall.copy(
                             fontWeight = FontWeight.Bold,
                             color = contentColor.copy(alpha = 0.3f),
                             fontFamily = fontFamily
@@ -193,7 +196,7 @@ fun EditorScreen(
                     onValueChange = viewModel::onContentChange,
                     modifier = Modifier.fillMaxSize(),
                     placeholder = { 
-                        Text("Share your thoughts...", style = MaterialTheme.typography.bodyLarge.copy(
+                        Text(stringResource(R.string.editor_content_hint), style = MaterialTheme.typography.bodyLarge.copy(
                             color = contentColor.copy(alpha = 0.3f),
                             fontFamily = fontFamily
                         )) 

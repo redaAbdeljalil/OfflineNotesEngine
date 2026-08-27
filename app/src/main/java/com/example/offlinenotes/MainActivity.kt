@@ -20,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
@@ -27,6 +28,7 @@ import com.example.offlinenotes.domain.model.AppTheme
 import com.example.offlinenotes.domain.repository.SecurityRepository
 import com.example.offlinenotes.domain.repository.SettingsRepository
 import com.example.offlinenotes.presentation.navigation.AppNavGraph
+import com.example.offlinenotes.presentation.navigation.Screen
 import com.example.offlinenotes.presentation.theme.OfflineNotesTheme
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -72,7 +74,7 @@ class MainActivity : FragmentActivity() {
                         } else if (status == BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED) {
                             showNoSecurityDialog = true
                         } else {
-                            // Hardware doesn't support security, bypass to prevent lockout
+                            // Hardware doesn't support security, bypass to prevent permanent lockout
                             isAuthenticated = true
                             isAuthChecked = true
                         }
@@ -107,7 +109,7 @@ class MainActivity : FragmentActivity() {
                         SplashScreen()
                     } else {
                         // Dynamically determine start destination based on onboarding status
-                        val startDestination = if (settings?.isOnboardingCompleted == true) "home" else "onboarding"
+                        val startDestination = if (settings?.isOnboardingCompleted == true) Screen.Home.route else Screen.Onboarding.route
                         AppNavGraph(startDestination = startDestination)
                     }
 
@@ -133,13 +135,13 @@ class MainActivity : FragmentActivity() {
     private fun SecuritySetupDialog(onDismiss: () -> Unit, onOpenSettings: () -> Unit) {
         AlertDialog(
             onDismissRequest = onDismiss,
-            title = { Text("Setup Required") },
+            title = { Text(stringResource(R.string.settings_section_security)) },
             text = { Text("Biometric Lock is enabled, but your device has no PIN or Fingerprint set up. Please secure your device to protect your notes.") },
             confirmButton = {
-                Button(onClick = onOpenSettings) { Text("Open Settings") }
+                Button(onClick = onOpenSettings) { Text(stringResource(R.string.common_open_settings)) }
             },
             dismissButton = {
-                TextButton(onClick = onDismiss) { Text("Later") }
+                TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_later)) }
             },
             shape = RoundedCornerShape(28.dp)
         )

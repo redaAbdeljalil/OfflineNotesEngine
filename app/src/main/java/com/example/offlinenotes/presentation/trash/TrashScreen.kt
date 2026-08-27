@@ -17,6 +17,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.offlinenotes.presentation.components.EmptyState
 import com.example.offlinenotes.presentation.components.NoteItem
 
+import androidx.compose.ui.res.stringResource
+import com.example.offlinenotes.R
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TrashScreen(
@@ -29,14 +32,14 @@ fun TrashScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Trash") },
+                title = { Text(stringResource(R.string.trash_title)) },
                 navigationIcon = {
-                    IconButton(onClick = onNavigateBack) { Icon(Icons.Default.ArrowBack, "Back") }
+                    IconButton(onClick = onNavigateBack) { Icon(Icons.Default.ArrowBack, stringResource(R.string.common_back)) }
                 },
                 actions = {
                     if (notes.isNotEmpty()) {
                         IconButton(onClick = { showEmptyConfirm = true }) {
-                            Icon(Icons.Default.DeleteSweep, "Empty Trash")
+                            Icon(Icons.Default.DeleteSweep, stringResource(R.string.trash_dialog_empty_title))
                         }
                     }
                 }
@@ -46,8 +49,8 @@ fun TrashScreen(
         if (notes.isEmpty()) {
             EmptyState(
                 icon = Icons.Outlined.Delete,
-                title = "Trash is empty",
-                description = "Deleted notes will stay here for a while.",
+                title = stringResource(R.string.trash_empty_title),
+                description = stringResource(R.string.trash_empty_desc),
                 modifier = Modifier.padding(padding)
             )
         } else {
@@ -68,16 +71,16 @@ fun TrashScreen(
     if (showEmptyConfirm) {
         AlertDialog(
             onDismissRequest = { showEmptyConfirm = false },
-            title = { Text("Empty Trash?") },
-            text = { Text("All notes in trash will be permanently deleted. This action cannot be undone.") },
+            title = { Text(stringResource(R.string.trash_dialog_empty_title)) },
+            text = { Text(stringResource(R.string.trash_dialog_empty_desc)) },
             confirmButton = {
                 TextButton(onClick = {
                     viewModel.emptyTrash()
                     showEmptyConfirm = false
-                }) { Text("Empty Trash", color = MaterialTheme.colorScheme.error) }
+                }) { Text(stringResource(R.string.common_delete), color = MaterialTheme.colorScheme.error) }
             },
             dismissButton = {
-                TextButton(onClick = { showEmptyConfirm = false }) { Text("Cancel") }
+                TextButton(onClick = { showEmptyConfirm = false }) { Text(stringResource(R.string.common_cancel)) }
             }
         )
     }

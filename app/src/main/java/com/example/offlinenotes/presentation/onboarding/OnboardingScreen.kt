@@ -27,9 +27,12 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.launch
 
+import androidx.compose.ui.res.stringResource
+import com.example.offlinenotes.R
+
 data class OnboardingPage(
-    val title: String,
-    val description: String,
+    val titleRes: Int,
+    val descriptionRes: Int,
     val icon: ImageVector,
     val color: Color
 )
@@ -42,20 +45,20 @@ fun OnboardingScreen(
 ) {
     val pages = listOf(
         OnboardingPage(
-            "Offline First",
-            "Your thoughts belong to you. Notes are stored locally and sync automatically when you're online.",
+            R.string.onboarding_offline_title,
+            R.string.onboarding_offline_desc,
             Icons.Outlined.WifiOff,
             MaterialTheme.colorScheme.primary
         ),
         OnboardingPage(
-            "Military-Grade Security",
-            "Everything is encrypted at rest. Protect your private notes with Biometric Fingerprint or Face ID.",
+            R.string.onboarding_security_title,
+            R.string.onboarding_security_desc,
             Icons.Outlined.Lock,
             Color(0xFF2D6A4F)
         ),
         OnboardingPage(
-            "Time Machine",
-            "Never lose a change. Browse your note's history and restore any version with a single tap.",
+            R.string.onboarding_history_title,
+            R.string.onboarding_history_desc,
             Icons.Outlined.History,
             Color(0xFF0061A4)
         )
@@ -104,7 +107,9 @@ fun OnboardingScreen(
                     contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
                 ) {
                     Text(
-                        text = if (pagerState.currentPage == pages.size - 1) "Get Started" else "Next",
+                        text = if (pagerState.currentPage == pages.size - 1) 
+                            stringResource(R.string.onboarding_get_started) 
+                        else stringResource(R.string.onboarding_next),
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
                     )
                     if (pagerState.currentPage < pages.size - 1) {
@@ -154,7 +159,7 @@ fun OnboardingPageContent(page: OnboardingPage) {
         Spacer(modifier = Modifier.height(48.dp))
         
         Text(
-            text = page.title,
+            text = stringResource(page.titleRes),
             style = MaterialTheme.typography.displaySmall.copy(
                 fontWeight = FontWeight.Bold,
                 letterSpacing = (-1).sp
@@ -166,7 +171,7 @@ fun OnboardingPageContent(page: OnboardingPage) {
         Spacer(modifier = Modifier.height(16.dp))
         
         Text(
-            text = page.description,
+            text = stringResource(page.descriptionRes),
             style = MaterialTheme.typography.bodyLarge.copy(
                 lineHeight = 28.sp,
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
