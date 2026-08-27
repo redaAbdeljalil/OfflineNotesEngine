@@ -9,13 +9,23 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+data class ArchiveUiState(
+    val notes: List<Note> = emptyList(),
+    val isLoading: Boolean = false
+)
+
 @HiltViewModel
 class ArchiveViewModel @Inject constructor(
     private val useCases: NoteUseCases
 ) : ViewModel() {
 
-    val archivedNotes: StateFlow<List<Note>> = useCases.getArchivedNotes()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+    val uiState: StateFlow<ArchiveUiState> = useCases.getArchivedNotes()
+        .map { notes -> ArchiveUiState(notes = notes) }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = ArchiveUiState(isLoading = true)
+        )
 
     fun unarchiveNote(note: Note) = viewModelScope.launch {
         useCases.archiveNote(note)

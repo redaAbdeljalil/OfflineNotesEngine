@@ -82,7 +82,9 @@
     <string name="common_restore">Restore</string>
     <string name="common_edit">Edit</string>
     <string name="common_archive">Archive</string>
+    <string name="common_unarchive">Unarchive</string>
     <string name="common_delete">Delete</string>
+    <string name="common_delete_permanently">Delete permanently</string>
     <string name="common_later">Later</string>
     <string name="common_open_settings">Open Settings</string>
 </resources>

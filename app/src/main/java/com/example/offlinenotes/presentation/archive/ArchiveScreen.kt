@@ -31,7 +31,7 @@ fun ArchiveScreen(
     onNoteClick: (String) -> Unit,
     viewModel: ArchiveViewModel = hiltViewModel()
 ) {
-    val notes by viewModel.archivedNotes.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var selectedNoteForMenu by remember { mutableStateOf<Note?>(null) }
     val sheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
@@ -46,7 +46,7 @@ fun ArchiveScreen(
             )
         }
     ) { padding ->
-        if (notes.isEmpty()) {
+        if (uiState.notes.isEmpty()) {
             EmptyState(
                 icon = Icons.Outlined.Archive,
                 title = stringResource(R.string.archive_empty_title),
@@ -61,7 +61,7 @@ fun ArchiveScreen(
                 verticalItemSpacing = 12.dp,
                 modifier = Modifier.padding(padding).fillMaxSize()
             ) {
-                items(notes, key = { it.id }) { note ->
+                items(uiState.notes, key = { it.id }) { note ->
                     NoteItem(
                         note = note, 
                         onClick = { onNoteClick(note.id) },
@@ -80,7 +80,7 @@ fun ArchiveScreen(
         ) {
             Column(modifier = Modifier.fillMaxWidth().padding(bottom = 32.dp, top = 8.dp)) {
                 ListItem(
-                    headlineContent = { Text("Unarchive") },
+                    headlineContent = { Text(stringResource(R.string.common_unarchive)) },
                     leadingContent = { Icon(Icons.Outlined.Unarchive, null) },
                     modifier = Modifier.clickable {
                         val note = selectedNoteForMenu ?: return@clickable

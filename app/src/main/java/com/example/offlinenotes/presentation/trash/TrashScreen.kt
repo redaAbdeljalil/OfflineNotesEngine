@@ -28,7 +28,7 @@ fun TrashScreen(
     onNavigateBack: () -> Unit,
     viewModel: TrashViewModel = hiltViewModel()
 ) {
-    val notes by viewModel.deletedNotes.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var selectedNoteForMenu by remember { mutableStateOf<Note?>(null) }
     var showEmptyConfirm by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
@@ -42,7 +42,7 @@ fun TrashScreen(
                     IconButton(onClick = onNavigateBack) { Icon(Icons.Default.ArrowBack, stringResource(R.string.common_back)) }
                 },
                 actions = {
-                    if (notes.isNotEmpty()) {
+                    if (uiState.notes.isNotEmpty()) {
                         IconButton(onClick = { showEmptyConfirm = true }) {
                             Icon(Icons.Default.DeleteSweep, stringResource(R.string.trash_dialog_empty_title))
                         }
@@ -51,7 +51,7 @@ fun TrashScreen(
             )
         }
     ) { padding ->
-        if (notes.isEmpty()) {
+        if (uiState.notes.isEmpty()) {
             EmptyState(
                 icon = Icons.Outlined.Delete,
                 title = stringResource(R.string.trash_empty_title),
@@ -66,7 +66,7 @@ fun TrashScreen(
                 verticalItemSpacing = 12.dp,
                 modifier = Modifier.padding(padding).fillMaxSize()
             ) {
-                items(notes, key = { it.id }) { note ->
+                items(uiState.notes, key = { it.id }) { note ->
                     NoteItem(
                         note = note, 
                         onClick = { selectedNoteForMenu = note },
@@ -85,7 +85,7 @@ fun TrashScreen(
         ) {
             Column(modifier = Modifier.fillMaxWidth().padding(bottom = 32.dp, top = 8.dp)) {
                 ListItem(
-                    headlineContent = { Text("Restore") },
+                    headlineContent = { Text(stringResource(R.string.common_restore)) },
                     leadingContent = { Icon(Icons.Outlined.RestoreFromTrash, null) },
                     modifier = Modifier.clickable {
                         val note = selectedNoteForMenu ?: return@clickable
@@ -96,7 +96,7 @@ fun TrashScreen(
                     }
                 )
                 ListItem(
-                    headlineContent = { Text("Delete permanently", color = MaterialTheme.colorScheme.error) },
+                    headlineContent = { Text(stringResource(R.string.common_delete_permanently), color = MaterialTheme.colorScheme.error) },
                     leadingContent = { Icon(Icons.Outlined.Delete, null, tint = MaterialTheme.colorScheme.error) },
                     modifier = Modifier.clickable {
                         val note = selectedNoteForMenu ?: return@clickable
