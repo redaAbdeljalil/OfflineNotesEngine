@@ -24,7 +24,6 @@ class NoteUseCases @Inject constructor(
     suspend fun triggerSync() = repository.triggerSync()
 
     suspend fun restoreVersion(noteId: String, versionId: String) {
-        // Find version and restore (handled via repo to track versions)
         repository.getNoteVersions(noteId).collect { versions ->
             versions.find { it.id == versionId }?.let {
                 repository.restoreVersion(it)

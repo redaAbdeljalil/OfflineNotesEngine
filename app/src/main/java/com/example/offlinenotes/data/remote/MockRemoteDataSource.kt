@@ -12,15 +12,13 @@ class MockRemoteDataSource @Inject constructor() {
     private val serverDb = ConcurrentHashMap<String, Note>()
 
     suspend fun pushNote(localNote: Note): Note {
-        delay(600) // Simulate latency
+        delay(600) 
         val serverNote = serverDb[localNote.id]
 
         if (serverNote != null && serverNote.version > localNote.version) {
-            // Conflict: Server has a newer version.
             throw SyncConflictException(serverNote)
         }
 
-        // Success: Bump version for server
         val updatedNote = localNote.copy(version = localNote.version + 1)
         serverDb[updatedNote.id] = updatedNote
         return updatedNote

@@ -73,7 +73,6 @@ fun OnboardingScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Page Indicator
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
@@ -90,7 +89,6 @@ fun OnboardingScreen(
                     }
                 }
 
-                // Next/Get Started Button
                 Button(
                     onClick = {
                         if (pagerState.currentPage < pages.size - 1) {

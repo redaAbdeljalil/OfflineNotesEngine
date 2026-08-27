@@ -47,11 +47,9 @@ class NoteRepositoryImpl @Inject constructor(
     override suspend fun saveNote(note: Note) {
         val oldNote = database.noteDao.getNoteByIdSync(note.id)
 
-        // Optimistic UI: Save locally as PENDING
         val pendingNote = note.copy(syncStatus = SyncStatus.PENDING, updatedAt = System.currentTimeMillis())
         database.noteDao.insertNote(pendingNote.toEntity())
 
-        // Save history if meaningful content changed
         if (oldNote != null && (oldNote.content != note.content || oldNote.title != note.title)) {
             database.versionDao.insertVersion(
                 NoteVersion(
@@ -65,7 +63,6 @@ class NoteRepositoryImpl @Inject constructor(
             )
         }
 
-        // Queue Sync
         queueSync(note.id, if (oldNote == null) SyncOperationType.CREATE else SyncOperationType.UPDATE)
     }
 
@@ -82,7 +79,7 @@ class NoteRepositoryImpl @Inject constructor(
             updatedAt = System.currentTimeMillis(),
             syncStatus = SyncStatus.PENDING
         )
-        saveNote(restoredNote.toDomain()) // This auto-triggers version backup of current state
+        saveNote(restoredNote.toDomain()) 
     }
 
     override suspend fun emptyTrash() {

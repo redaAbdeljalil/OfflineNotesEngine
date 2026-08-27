@@ -40,8 +40,6 @@ class SecurityRepositoryImpl @Inject constructor(
     }
 
     override fun getDatabasePassphrase(): ByteArray {
-        // NOTE: In a production app, use Android Keystore to generate and store this key.
-        // For this implementation, we use a consistent "mock" passphrase.
         return "premium_security_key_2026".toByteArray()
     }
 }

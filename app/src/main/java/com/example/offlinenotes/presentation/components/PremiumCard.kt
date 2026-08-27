@@ -18,7 +18,7 @@ fun PremiumCard(
     onClick: (() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit
 ) {
-    val border = if (MaterialTheme.colorScheme.surface == Color(0xFF1E293B)) { // Simple dark mode check
+    val border = if (MaterialTheme.colorScheme.surface == Color(0xFF1E293B)) { 
         BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.1f))
     } else null
 

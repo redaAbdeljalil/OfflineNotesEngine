@@ -32,7 +32,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class MainActivity : FragmentActivity() { // FragmentActivity for Biometrics
+class MainActivity : FragmentActivity() {
 
     @Inject lateinit var settingsRepository: SettingsRepository
     @Inject lateinit var securityRepository: SecurityRepository
@@ -47,12 +47,10 @@ class MainActivity : FragmentActivity() { // FragmentActivity for Biometrics
             val isBiometricEnabled by securityRepository.isBiometricEnabled.collectAsState(initial = null)
             val isScreenshotProtected by securityRepository.isScreenshotProtectionEnabled.collectAsState(initial = false)
             
-            // App state management
             var isAuthenticated by remember { mutableStateOf(false) }
             var isAuthChecked by remember { mutableStateOf(false) }
             var showNoSecurityDialog by remember { mutableStateOf(false) }
 
-            // Determine if we are still loading initial user preferences
             val isLoading = settings == null || isBiometricEnabled == null
 
             LaunchedEffect(isBiometricEnabled) {

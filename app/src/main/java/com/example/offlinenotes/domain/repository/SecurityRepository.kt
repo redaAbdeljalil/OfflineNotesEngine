@@ -11,6 +11,5 @@ interface SecurityRepository {
     
     fun isDeviceRooted(): Boolean
     
-    // In a real app, this would be managed via Keystore
     fun getDatabasePassphrase(): ByteArray
 }

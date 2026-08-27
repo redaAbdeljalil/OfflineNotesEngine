@@ -38,7 +38,6 @@ class SyncEngineTest {
 
     @Test
     fun `test conflict resolution saves history and overwrites local`() = runTest {
-        // Arrange
         val noteId = "note1"
         val op = SyncOperationEntity("op1", noteId, SyncOperationType.UPDATE, 0L)
         val localNote = NoteEntity(noteId, "Local", "A", 0L, 0L, false, false, false, 1, SyncStatus.PENDING)
@@ -48,13 +47,11 @@ class SyncEngineTest {
         `when`(noteDao.getNoteByIdSync(noteId)).thenReturn(localNote)
         `when`(remoteData.pushNote(any())).thenThrow(SyncConflictException(remoteNoteDomain))
 
-        // Act
         val success = syncEngine.performSync()
 
-        // Assert
         assertTrue(success)
-        verify(versionDao).insertVersion(argThat { it.content == "A" }) // Local preserved in history
-        verify(noteDao).insertNote(argThat { it.content == "B" && it.syncStatus == SyncStatus.SYNCED }) // Remote adopted
+        verify(versionDao).insertVersion(argThat { it.content == "A" }) 
+        verify(noteDao).insertNote(argThat { it.content == "B" && it.syncStatus == SyncStatus.SYNCED }) 
         verify(syncDao).deleteOperation(op)
     }
 }
