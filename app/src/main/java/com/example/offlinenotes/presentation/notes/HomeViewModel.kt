@@ -45,5 +45,6 @@ class HomeViewModel @Inject constructor(
     }
 
     fun pinNote(note: Note) = viewModelScope.launch { useCases.pinNote(note) }
+    fun archiveNote(note: Note) = viewModelScope.launch { useCases.archiveNote(note) }
     fun deleteNote(note: Note) = viewModelScope.launch { useCases.deleteNote(note.id) }
 }

@@ -1,7 +1,6 @@
 package com.example.offlinenotes.presentation.notes
 
-import androidx.compose.animation.*
-import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.staggeredgrid.*
 import androidx.compose.foundation.shape.CircleShape
@@ -9,6 +8,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.Archive
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -25,9 +26,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.offlinenotes.domain.model.Note
 import com.example.offlinenotes.presentation.components.EmptyState
 import com.example.offlinenotes.presentation.components.NoteItem
-
 import androidx.compose.ui.res.stringResource
 import com.example.offlinenotes.R
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -40,6 +41,10 @@ fun HomeScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    
+    var selectedNoteForMenu by remember { mutableStateOf<Note?>(null) }
+    val sheetState = rememberModalBottomSheetState()
+    val scope = rememberCoroutineScope()
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -123,7 +128,11 @@ fun HomeScreen(
                             SectionHeader(stringResource(R.string.home_section_pinned))
                         }
                         items(pinnedNotes, key = { it.id }) { note ->
-                            NoteItem(note = note, onClick = { onNoteClick(note.id) })
+                            NoteItem(
+                                note = note, 
+                                onClick = { onNoteClick(note.id) },
+                                onLongClick = { selectedNoteForMenu = note }
+                            )
                         }
                         item(span = StaggeredGridItemSpan.FullLine) {
                             Spacer(modifier = Modifier.height(16.dp))
@@ -137,10 +146,61 @@ fun HomeScreen(
                             else stringResource(R.string.home_section_recent))
                         }
                         items(otherNotes, key = { it.id }) { note ->
-                            NoteItem(note = note, onClick = { onNoteClick(note.id) })
+                            NoteItem(
+                                note = note, 
+                                onClick = { onNoteClick(note.id) },
+                                onLongClick = { selectedNoteForMenu = note }
+                            )
                         }
                     }
                 }
+            }
+        }
+    }
+
+    if (selectedNoteForMenu != null) {
+        ModalBottomSheet(
+            onDismissRequest = { selectedNoteForMenu = null },
+            sheetState = sheetState,
+            shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+            containerColor = MaterialTheme.colorScheme.surface
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 32.dp, top = 8.dp)
+            ) {
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.common_edit)) },
+                    leadingContent = { Icon(Icons.Outlined.Edit, null) },
+                    modifier = Modifier.clickable {
+                        val note = selectedNoteForMenu ?: return@clickable
+                        onNoteClick(note.id)
+                        selectedNoteForMenu = null
+                    }
+                )
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.common_archive)) },
+                    leadingContent = { Icon(Icons.Outlined.Archive, null) },
+                    modifier = Modifier.clickable {
+                        val note = selectedNoteForMenu ?: return@clickable
+                        viewModel.archiveNote(note)
+                        scope.launch { sheetState.hide() }.invokeOnCompletion {
+                            selectedNoteForMenu = null
+                        }
+                    }
+                )
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.common_delete), color = MaterialTheme.colorScheme.error) },
+                    leadingContent = { Icon(Icons.Outlined.Delete, null, tint = MaterialTheme.colorScheme.error) },
+                    modifier = Modifier.clickable {
+                        val note = selectedNoteForMenu ?: return@clickable
+                        viewModel.deleteNote(note)
+                        scope.launch { sheetState.hide() }.invokeOnCompletion {
+                            selectedNoteForMenu = null
+                        }
+                    }
+                )
             }
         }
     }

@@ -28,7 +28,8 @@ import java.util.*
 fun NoteItem(
     note: Note,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onLongClick: (() -> Unit)? = null
 ) {
     val isDark = isSystemInDarkTheme()
     val noteColor = getNoteColor(note.colorHex, isDark)
@@ -41,6 +42,7 @@ fun NoteItem(
 
     PremiumCard(
         onClick = onClick,
+        onLongClick = onLongClick,
         containerColor = backgroundColor,
         modifier = modifier.fillMaxWidth()
     ) {
