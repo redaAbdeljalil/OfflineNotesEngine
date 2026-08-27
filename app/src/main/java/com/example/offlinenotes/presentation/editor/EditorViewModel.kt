@@ -39,6 +39,7 @@ class EditorViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(EditorState())
     val uiState = _uiState.asStateFlow()
 
+    // Engine for session-based Undo and Redo functionality
     private val undoStack = mutableListOf<EditorState>()
     private val redoStack = mutableListOf<EditorState>()
     private var saveJob: Job? = null
@@ -71,6 +72,7 @@ class EditorViewModel @Inject constructor(
                         it.colorHex, it.tags
                     )
                     _uiState.value = state
+                    // Initialize undo stack with loaded state
                     if (undoStack.isEmpty()) undoStack.add(state)
                 }
             }
@@ -127,6 +129,7 @@ class EditorViewModel @Inject constructor(
         saveJob?.cancel()
         _uiState.update { it.copy(isSaving = true) }
         saveJob = viewModelScope.launch {
+            // Debounce auto-save to minimize database writes during active typing
             delay(1000)
             saveImmediately()
         }

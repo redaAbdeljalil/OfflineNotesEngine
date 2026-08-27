@@ -23,6 +23,7 @@ fun AppNavGraph(
 ) {
     val navController = rememberNavController()
 
+    // Centralized Navigation Graph with high-end slide/fade transitions
     NavHost(
         navController = navController,
         startDestination = startDestination,

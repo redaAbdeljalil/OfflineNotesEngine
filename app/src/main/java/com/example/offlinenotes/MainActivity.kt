@@ -47,10 +47,12 @@ class MainActivity : FragmentActivity() {
             val isBiometricEnabled by securityRepository.isBiometricEnabled.collectAsState(initial = null)
             val isScreenshotProtected by securityRepository.isScreenshotProtectionEnabled.collectAsState(initial = false)
             
+            // Core application state management
             var isAuthenticated by remember { mutableStateOf(false) }
             var isAuthChecked by remember { mutableStateOf(false) }
             var showNoSecurityDialog by remember { mutableStateOf(false) }
 
+            // Splash/Loading state while DataStore preferences are being fetched
             val isLoading = settings == null || isBiometricEnabled == null
 
             LaunchedEffect(isBiometricEnabled) {
@@ -70,6 +72,7 @@ class MainActivity : FragmentActivity() {
                         } else if (status == BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED) {
                             showNoSecurityDialog = true
                         } else {
+                            // Hardware doesn't support security, bypass to prevent lockout
                             isAuthenticated = true
                             isAuthChecked = true
                         }
@@ -81,6 +84,7 @@ class MainActivity : FragmentActivity() {
             }
 
             LaunchedEffect(isScreenshotProtected) {
+                // Prevent screenshots and screen recordings for sensitive note data
                 if (isScreenshotProtected) {
                     window.setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE)
                 } else {
@@ -102,6 +106,7 @@ class MainActivity : FragmentActivity() {
                     if (isLoading || !isAuthChecked) {
                         SplashScreen()
                     } else {
+                        // Dynamically determine start destination based on onboarding status
                         val startDestination = if (settings?.isOnboardingCompleted == true) "home" else "onboarding"
                         AppNavGraph(startDestination = startDestination)
                     }
@@ -196,6 +201,7 @@ class MainActivity : FragmentActivity() {
         }
     }
 
+    // Biometric prompt logic supporting both Fingerprint/Face and PIN fallback
     private fun showBiometricPrompt(onResult: (Boolean) -> Unit) {
         val executor = ContextCompat.getMainExecutor(this)
         val biometricPrompt = BiometricPrompt(this, executor,

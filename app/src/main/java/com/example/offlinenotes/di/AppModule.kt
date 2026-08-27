@@ -36,6 +36,7 @@ object AppModule {
         securityRepository: SecurityRepository
     ): OfflineNotesDatabase {
         val dbName = "offline_notes_premium_db" 
+        // Initializing SQLCipher factory with our master passphrase for at-rest encryption
         val factory = SupportFactory(securityRepository.getDatabasePassphrase())
         return Room.databaseBuilder(
             context,

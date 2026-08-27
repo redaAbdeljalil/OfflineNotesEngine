@@ -27,11 +27,13 @@ class SyncEngine @Inject constructor(
                     remoteData.deleteNote(op.noteId)
                 } else {
                     val syncedNote = remoteData.pushNote(localNoteEntity.toDomain())
+                    // Update local with server acknowledged version
                     database.noteDao.insertNote(syncedNote.copy(syncStatus = SyncStatus.SYNCED).toEntity())
                 }
                 database.syncDao.deleteOperation(op)
 
             } catch (e: SyncConflictException) {
+                // CONFLICT RESOLUTION: Preserve local changes to history, adopt server state.
                 val conflictingLocal = database.noteDao.getNoteByIdSync(op.noteId)!!
 
                 database.versionDao.insertVersion(
@@ -44,12 +46,14 @@ class SyncEngine @Inject constructor(
                         versionNumber = conflictingLocal.version
                     ).toEntity()
                 )
+                // Overwrite local with remote
                 database.noteDao.insertNote(e.serverNote.copy(syncStatus = SyncStatus.SYNCED).toEntity())
                 database.syncDao.deleteOperation(op)
 
             } catch (e: Exception) {
                 allSuccess = false
                 database.syncDao.incrementRetry(op.id)
+                // Mark note as ERROR state
                 val note = database.noteDao.getNoteByIdSync(op.noteId)
                 if (note != null) {
                     database.noteDao.insertNote(note.copy(syncStatus = SyncStatus.ERROR))
