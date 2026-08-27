@@ -11,7 +11,11 @@ import com.example.offlinenotes.data.local.entity.NoteVersionEntity
 import com.example.offlinenotes.data.local.entity.SyncOperationEntity
 
 @Database(
-    entities = [NoteEntity::class, NoteVersionEntity::class, SyncOperationEntity::class],
+    entities = [
+        NoteEntity::class, 
+        NoteVersionEntity::class, 
+        SyncOperationEntity::class
+    ],
     version = 2,
     exportSchema = true
 )

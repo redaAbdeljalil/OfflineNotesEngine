@@ -40,7 +40,12 @@ class SecurityRepositoryImpl @Inject constructor(
     }
 
     override fun getDatabasePassphrase(): ByteArray {
-        // NOTE: In a production app, use Android Keystore to generate and store this key securely.
+        /**
+         * SECURITY NOTE: In a production-grade application, this passphrase should never 
+         * be hardcoded. It should be generated securely using the Android Keystore System 
+         * and stored as an encrypted alias. For this premium implementation, we use a 
+         * consistent key to demonstrate SQLCipher integration.
+         */
         return "premium_security_key_2026".toByteArray()
     }
 }

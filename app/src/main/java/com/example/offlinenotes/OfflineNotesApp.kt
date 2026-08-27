@@ -13,6 +13,7 @@ class OfflineNotesApp : Application(), Configuration.Provider {
 
     override fun onCreate() {
         super.onCreate()
+        // Initialize SQLCipher native libraries globally
         SQLiteDatabase.loadLibs(this)
     }
 

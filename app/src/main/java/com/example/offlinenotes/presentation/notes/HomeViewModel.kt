@@ -14,7 +14,8 @@ import javax.inject.Inject
 data class HomeUiState(
     val notes: List<Note> = emptyList(),
     val searchQuery: String = "",
-    val isLoading: Boolean = false
+    val isLoading: Boolean = false,
+    val errorMessage: String? = null
 )
 
 @HiltViewModel
@@ -31,9 +32,9 @@ class HomeViewModel @Inject constructor(
     ) { query, settings ->
         query to settings.defaultSorting
     }.flatMapLatest { (query, sorting) ->
-        useCases.getNotes(query, sorting).map { notes ->
-            HomeUiState(notes = notes, searchQuery = query)
-        }
+        useCases.getNotes(query, sorting)
+            .map { notes -> HomeUiState(notes = notes, searchQuery = query) }
+            .catch { e -> emit(HomeUiState(errorMessage = e.message)) }
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
@@ -44,7 +45,15 @@ class HomeViewModel @Inject constructor(
         _searchQuery.value = query
     }
 
-    fun pinNote(note: Note) = viewModelScope.launch { useCases.pinNote(note) }
-    fun archiveNote(note: Note) = viewModelScope.launch { useCases.archiveNote(note) }
-    fun deleteNote(note: Note) = viewModelScope.launch { useCases.deleteNote(note.id) }
+    fun pinNote(note: Note) = viewModelScope.launch { 
+        useCases.pinNote(note) 
+    }
+
+    fun archiveNote(note: Note) = viewModelScope.launch { 
+        useCases.archiveNote(note) 
+    }
+
+    fun deleteNote(note: Note) = viewModelScope.launch { 
+        useCases.deleteNote(note.id) 
+    }
 }

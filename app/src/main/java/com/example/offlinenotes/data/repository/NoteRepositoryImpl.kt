@@ -107,7 +107,9 @@ class NoteRepositoryImpl @Inject constructor(
                 createdAt = System.currentTimeMillis()
             )
         )
-        if (settingsRepository.settings.first().syncEnabled) {
+        // Only trigger background worker if user has enabled sync in settings
+        val isSyncEnabled = settingsRepository.settings.first().syncEnabled
+        if (isSyncEnabled) {
             triggerSyncWorker()
         }
     }

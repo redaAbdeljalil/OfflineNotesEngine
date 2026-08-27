@@ -135,9 +135,12 @@ class EditorViewModel @Inject constructor(
         }
     }
 
+    private var lastSavedState: EditorState? = null
+
     fun saveImmediately() {
         val state = _uiState.value
         if (state.title.isBlank() && state.content.isBlank()) return
+        if (state == lastSavedState) return
 
         viewModelScope.launch {
             useCases.saveNote(
@@ -156,6 +159,7 @@ class EditorViewModel @Inject constructor(
                     tags = state.tags
                 )
             )
+            lastSavedState = state
             _uiState.update { it.copy(isSaving = false) }
         }
     }
