@@ -24,4 +24,8 @@ class TrashViewModel @Inject constructor(
     fun emptyTrash() = viewModelScope.launch {
         useCases.emptyTrash()
     }
+
+    fun deleteNotePermanently(id: String) = viewModelScope.launch {
+        useCases.deleteNotePermanently(id)
+    }
 }

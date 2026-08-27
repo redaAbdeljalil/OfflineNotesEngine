@@ -14,6 +14,7 @@ interface NoteRepository {
 
     suspend fun saveNote(note: Note)
     suspend fun deleteNote(id: String)
+    suspend fun deleteNotePermanently(id: String)
     suspend fun restoreVersion(version: NoteVersion)
     suspend fun emptyTrash()
     suspend fun triggerSync()

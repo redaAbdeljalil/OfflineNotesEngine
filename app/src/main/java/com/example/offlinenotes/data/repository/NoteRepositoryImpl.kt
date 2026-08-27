@@ -75,6 +75,10 @@ class NoteRepositoryImpl @Inject constructor(
         queueSync(id, SyncOperationType.DELETE)
     }
 
+    override suspend fun deleteNotePermanently(id: String) = withContext(ioDispatcher) {
+        database.noteDao.deleteNoteById(id)
+    }
+
     override suspend fun restoreVersion(version: NoteVersion) = withContext(ioDispatcher) {
         val current = database.noteDao.getNoteByIdSync(version.noteId) ?: return@withContext
         val restoredNote = current.copy(

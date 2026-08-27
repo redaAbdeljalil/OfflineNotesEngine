@@ -20,6 +20,7 @@ class NoteUseCases @Inject constructor(
     suspend fun pinNote(note: Note) = repository.saveNote(note.copy(isPinned = !note.isPinned))
     suspend fun archiveNote(note: Note) = repository.saveNote(note.copy(isArchived = !note.isArchived))
     suspend fun deleteNote(id: String) = repository.deleteNote(id)
+    suspend fun deleteNotePermanently(id: String) = repository.deleteNotePermanently(id)
     suspend fun emptyTrash() = repository.emptyTrash()
     suspend fun triggerSync() = repository.triggerSync()
 
